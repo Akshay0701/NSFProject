@@ -276,7 +276,7 @@ const HomePage = () => {
               >
                 {isLoading ? (
                   <span>
-                    Processing... <span className="loading-spinner">⏳</span>
+                    <span className="loading-spinner" /> Processing...
                   </span>
                 ) : (
                   'Generate Research Teams & Proposals'

@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from projectideacreation import NSFProjectChain
 from research_extractor import extract_research_interests  # Assuming this exists
 from team_creator import form_teams, extract_main_research_areas
 
@@ -62,6 +63,28 @@ def teamcreation():
         output.append(team_data)
 
     return jsonify(output)
+
+
+# Instantiate the NSFProjectChain
+nsf_chain = NSFProjectChain()
+
+@app.route('/generate-proposals', methods=['POST'])
+def generate_proposals():
+    teams = request.get_json()
+    if not teams:
+        return jsonify({"error": "No teams data provided"}), 400
+    
+    # For each team, call Groq via our NSFProjectChain to generate project proposals.
+    for team in teams:
+        try:
+            proposals = nsf_chain.generate_project_proposals(team)
+            team["project_proposals"] = proposals
+        except Exception as e:
+            # Optionally log the error; here we include an error message in the team output.
+            team["project_proposals"] = [f"Error generating proposals: {str(e)}"]
+    
+    # Return the updated teams list as JSON.
+    return jsonify(teams), 200
 
 if __name__ == "__main__":
     app.run(debug=True)

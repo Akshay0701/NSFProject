@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import './ProfilePage.css'; // Optional: Create this for styling
+import './ProfilePage.css';
 
 const ProfilePage = () => {
   const location = useLocation();
@@ -9,27 +9,22 @@ const ProfilePage = () => {
   const [isCreatingTeams, setIsCreatingTeams] = useState(false);
 
   const handleCreateTeams = async () => {
-    if (profiles.length === 0) {
-      alert('No profiles to create teams from.');
-      return;
-    }
+    if (profiles.length === 0) return;
+    
     setIsCreatingTeams(true);
     try {
       const response = await fetch('http://127.0.0.1:5000/teamcreation', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(profiles),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(profiles)
       });
-      if (!response.ok) {
-        throw new Error('Failed to create teams');
-      }
+      
+      if (!response.ok) throw new Error('Failed to create teams');
       const data = await response.json();
       navigate('/teams', { state: { teams: data } });
     } catch (error) {
-      alert('Error creating teams. Please try again.');
       console.error(error);
+      alert('Error creating teams. Please try again.');
     } finally {
       setIsCreatingTeams(false);
     }
@@ -37,45 +32,69 @@ const ProfilePage = () => {
 
   return (
     <div className="profile-page">
-      <h1>Researcher Profiles with Extracted Topics</h1>
+      <header className="page-header">
+        <h1 className="page-title">Researcher Profiles</h1>
+        <div className="header-actions">
+          <button 
+            onClick={() => navigate('/')}
+            className="back-button"
+          >
+            ← Back to Home
+          </button>
+        </div>
+      </header>
+
       {profiles.length === 0 ? (
-        <p>No profiles available. Please submit researcher profiles from the homepage.</p>
+        <div className="empty-state">
+          <div className="empty-icon">🧑🔬</div>
+          <p className="empty-message">
+            No profiles available. Please submit researcher profiles from the homepage.
+          </p>
+        </div>
       ) : (
-        <div className="profiles-list">
+        <div className="profiles-grid">
           {profiles.map((profile, index) => (
             <div key={index} className="profile-card">
-              <h2>{profile.name}</h2>
-              <h3>Research Topics:</h3>
-              {profile.research_topics && profile.research_topics.length > 0 ? (
-                <ul>
-                  {profile.research_topics.map((topic, idx) => (
-                    <li key={idx}>{topic}</li>
-                  ))}
-                </ul>
-              ) : (
-                <p>No research topics extracted.</p>
-              )}
+              <div className="card-header">
+                <h2 className="researcher-name">{profile.name}</h2>
+                {profile.affiliation && (
+                  <p className="affiliation">{profile.affiliation}</p>
+                )}
+              </div>
+              
+              <div className="research-section">
+                <h3 className="section-title">Research Topics</h3>
+                {profile.research_topics?.length > 0 ? (
+                  <div className="topics-container">
+                    {profile.research_topics.map((topic, idx) => (
+                      <span key={idx} className="topic-tag">{topic}</span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="no-topics">No research topics extracted</p>
+                )}
+              </div>
             </div>
           ))}
         </div>
       )}
+
       <div className="actions-container">
         <button
           onClick={handleCreateTeams}
           disabled={isCreatingTeams || profiles.length === 0}
-          className="create-teams-button"
+          className={`create-teams-button ${isCreatingTeams ? 'loading' : ''}`}
         >
           {isCreatingTeams ? (
             <>
-              <div className="loading-spinner" />
-              Creating Teams...
+              <div className="loading-spinner"></div>
+              Generating Teams...
             </>
-          ) : 'Create Teams'}
+          ) : (
+            'Create Research Teams'
+          )}
         </button>
-        </div>
-        <button onClick={() => navigate('/')} className="back-button">
-          Back to Home
-        </button>
+      </div>
     </div>
   );
 };
