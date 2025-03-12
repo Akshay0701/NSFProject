@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import './ProfilePage.css'; // Optional: Create this for styling
 
@@ -6,6 +6,34 @@ const ProfilePage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const profiles = location.state?.profiles || [];
+  const [isCreatingTeams, setIsCreatingTeams] = useState(false);
+
+  const handleCreateTeams = async () => {
+    if (profiles.length === 0) {
+      alert('No profiles to create teams from.');
+      return;
+    }
+    setIsCreatingTeams(true);
+    try {
+      const response = await fetch('http://127.0.0.1:5000/teamcreation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(profiles),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to create teams');
+      }
+      const data = await response.json();
+      navigate('/teams', { state: { teams: data } });
+    } catch (error) {
+      alert('Error creating teams. Please try again.');
+      console.error(error);
+    } finally {
+      setIsCreatingTeams(false);
+    }
+  };
 
   return (
     <div className="profile-page">
@@ -31,12 +59,23 @@ const ProfilePage = () => {
           ))}
         </div>
       )}
-      <button 
-        onClick={() => navigate('/')} 
-        className="back-button"
-      >
-        Back to Home
-      </button>
+      <div className="actions-container">
+        <button
+          onClick={handleCreateTeams}
+          disabled={isCreatingTeams || profiles.length === 0}
+          className="create-teams-button"
+        >
+          {isCreatingTeams ? (
+            <>
+              <div className="loading-spinner" />
+              Creating Teams...
+            </>
+          ) : 'Create Teams'}
+        </button>
+        </div>
+        <button onClick={() => navigate('/')} className="back-button">
+          Back to Home
+        </button>
     </div>
   );
 };
