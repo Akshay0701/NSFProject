@@ -5,7 +5,7 @@ from research_extractor import extract_research_interests  # Assuming this exist
 from team_creator import form_teams, extract_main_research_areas
 
 app = Flask(__name__)
-CORS(app)  # Allows all origins by default
+CORS(app, resources={r"/*": {"origins": "*"}})  # Explicitly allow all
 
 # Existing endpoint (example, adjust as per your actual implementation)
 @app.route('/extract_interests', methods=['POST'])
