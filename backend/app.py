@@ -5,26 +5,7 @@ from research_extractor import extract_research_interests  # Assuming this exist
 from team_creator import form_teams, extract_main_research_areas
 
 app = Flask(__name__)
-
-# Enable CORS for all routes
-CORS(app, resources={
-    r"/*": {  # Apply to all routes
-        "origins": "*",
-        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        "allow_headers": "*",
-        "expose_headers": "*"
-    }
-})
-
-# Add OPTIONS handler for all routes
-@app.route('/', defaults={'path': ''}, methods=['OPTIONS'])
-@app.route('/<path:path>', methods=['OPTIONS'])
-def options_handler(path):
-    return '', 200, {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': '*'
-    }
+CORS(app)  # Allows all origins by default
 
 # Existing endpoint (example, adjust as per your actual implementation)
 @app.route('/nsf/extract_interests', methods=['POST'])
