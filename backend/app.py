@@ -8,7 +8,7 @@ app = Flask(__name__)
 CORS(app)  # Allows all origins by default
 
 # Existing endpoint (example, adjust as per your actual implementation)
-@app.route('/extract_interests', methods=['POST'])
+@app.route('/nsf/extract_interests', methods=['POST'])
 def extract_interests():
     data = request.get_json()
     if not data:
@@ -24,7 +24,7 @@ def extract_interests():
     return jsonify(results), 200
 
 # New endpoint for team creation
-@app.route('/teamcreation', methods=['POST'])
+@app.route('/nsf/teamcreation', methods=['POST'])
 def teamcreation():
     """
     Creates teams from a list of researchers based on their research topics.
@@ -68,7 +68,7 @@ def teamcreation():
 # Instantiate the NSFProjectChain
 nsf_chain = NSFProjectChain()
 
-@app.route('/generate-proposals', methods=['POST'])
+@app.route('/nsf/generate-proposals', methods=['POST'])
 def generate_proposals():
     teams = request.get_json()
     if not teams:

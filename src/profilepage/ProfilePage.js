@@ -13,7 +13,7 @@ const ProfilePage = () => {
     
     setIsCreatingTeams(true);
     try {
-      const response = await fetch('http://127.0.0.1:5000/teamcreation', {
+      const response = await fetch('http://128.230.146.89/nsf/teamcreation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(profiles)
