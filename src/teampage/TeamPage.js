@@ -11,7 +11,7 @@ const TeamPage = () => {
   const handleGenerateProposals = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://128.230.146.89/nsf/generate-proposals', {
+      const response = await fetch('/api/nsf/generate-proposals', {
         method: 'POST',
         mode: "cors",
         headers: { 'Content-Type': 'application/json' },

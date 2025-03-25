@@ -1,0 +1,5 @@
+[[redirects]]
+  from = "/api/nsf/*"
+  to = "http://128.230.146.89/nsf/:splat"
+  status = 200
+  force = true
