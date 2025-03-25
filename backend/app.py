@@ -6,13 +6,10 @@ from team_creator import form_teams, extract_main_research_areas
 
 app = Flask(__name__)
 CORS(app, resources={
-    r"/nsf/*": {
-        "origins": [
-            "https://nsfteamform.netlify.app/",  # Your Netlify URL
-            "http://localhost:3000"  # For local development
-        ],
-        "methods": ["GET", "POST", "PUT", "DELETE"],
-        "allow_headers": ["Content-Type"]
+    r"/*": {  # Apply to all routes
+        "origins": "*",  # Wildcard allows any origin
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": "*"
     }
 })
 
