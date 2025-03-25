@@ -13,6 +13,7 @@ const TeamPage = () => {
     try {
       const response = await fetch('http://128.230.146.89/nsf/generate-proposals', {
         method: 'POST',
+        mode: "cors",
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(teams)
       });

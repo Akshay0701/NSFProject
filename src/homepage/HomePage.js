@@ -178,6 +178,7 @@ const HomePage = () => {
 
     const response = await fetch('http://128.230.146.89/nsf/extract_interests', {
       method: 'POST',
+      mode: "cors",
       headers: {
         'Content-Type': 'application/json',
       },

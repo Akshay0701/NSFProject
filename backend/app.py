@@ -5,13 +5,25 @@ from research_extractor import extract_research_interests  # Assuming this exist
 from team_creator import form_teams, extract_main_research_areas
 
 app = Flask(__name__)
+
+# Most permissive CORS settings
 CORS(app, resources={
-    r"/*": {  # Apply to all routes
-        "origins": "*",  # Wildcard allows any origin
+    r"/nsf/*": {
+        "origins": "*",
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        "allow_headers": "*"
+        "allow_headers": "*",
+        "expose_headers": "*",
+        "supports_credentials": False
     }
 })
+
+@app.after_request
+def after_request(response):
+    # Additional headers for debugging
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', '*')
+    response.headers.add('Access-Control-Allow-Methods', '*')
+    return response
 
 # Existing endpoint (example, adjust as per your actual implementation)
 @app.route('/nsf/extract_interests', methods=['POST'])
