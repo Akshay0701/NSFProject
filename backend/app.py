@@ -1,7 +1,7 @@
-from flask import Flask, request, jsonify
+from flask import Flask, json, request, jsonify
 from flask_cors import CORS
 from projectideacreation import NSFProjectChain
-from research_extractor import extract_research_interests  # Assuming this exists
+from research_extractor import extract_research_interests, extract_text_from_pdf  # Assuming this exists
 from team_creator import form_teams, extract_main_research_areas
 
 app = Flask(__name__)
@@ -10,17 +10,37 @@ CORS(app)  # Allows all origins by default
 # Existing endpoint (example, adjust as per your actual implementation)
 @app.route('/nsf/extract_interests', methods=['POST'])
 def extract_interests():
-    data = request.get_json()
-    if not data:
-        return jsonify({"error": "No data provided"}), 400
+    """Extract research interests from profiles with either text or PDF input."""
+    if 'profiles' not in request.form:
+        return jsonify({"error": "No profiles data provided"}), 400
+    
+    try:
+        profiles_data = json.loads(request.form['profiles'])
+    except json.JSONDecodeError:
+        return jsonify({"error": "Invalid JSON in profiles field"}), 400
+
     results = []
-    for profile in data:
+    for index, profile in enumerate(profiles_data):
         name = profile.get('name')
-        description = profile.get('description')
+        description = profile.get('description', '')
+        
+        # Check if a PDF file is provided for this profile
+        pdf_field = f'pdf{index}'
+        if pdf_field in request.files:
+            pdf_file = request.files[pdf_field]
+            extracted_text = extract_text_from_pdf(pdf_file)
+            if extracted_text is None:
+                return jsonify({"error": f"Failed to extract text from PDF for profile {index}"}), 400
+            description = extracted_text
+        
+        # Skip if name or description is missing
         if not name or not description:
             continue
+        
+        # Extract research interests from the text (either from description or PDF)
         topics = extract_research_interests(description)
         results.append({"name": name, "research_topics": topics})
+    
     return jsonify(results), 200
 
 # New endpoint for team creation

@@ -41,23 +41,34 @@ const initialResearcherProfile = {
   affiliation: '',
   researchArea: '',
   text: '',
-  expanded: true
+  pdfFile: null, // Added to store the uploaded PDF file
+  expanded: true,
+  isProcessingPDF: false // Added to track PDF processing state (for UI feedback)
 };
 
-const ResearcherProfile = ({ 
-  profile, 
-  index, 
-  updateProfile, 
-  removeProfile, 
-  isFirst, 
-  total 
+const ResearcherProfile = ({
+  profile,
+  index,
+  updateProfile,
+  removeProfile,
+  isFirst,
+  total
 }) => {
   const toggleExpanded = () => {
     updateProfile(index, { ...profile, expanded: !profile.expanded });
   };
 
   const handleTextChange = (e) => {
-    updateProfile(index, { ...profile, text: e.target.value });
+    updateProfile(index, { ...profile, text: e.target.value, pdfFile: null }); // Clear pdfFile if text is manually edited
+  };
+
+  const handlePDFUpload = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type === 'application/pdf') {
+      updateProfile(index, { ...profile, pdfFile: file, text: '' }); // Store file and clear text
+    } else {
+      alert('Please upload a valid PDF file');
+    }
   };
 
   return (
@@ -73,7 +84,7 @@ const ResearcherProfile = ({
           {profile.expanded ? '▲' : '▼'}
         </button>
       </div>
-      
+  
       {profile.expanded && (
         <div className="profile-content">
           <div className="profile-details">
@@ -88,7 +99,7 @@ const ResearcherProfile = ({
                 className="input-field"
               />
             </div>
-            
+  
             <div className="input-group">
               <label htmlFor={`researcher-affiliation-${index}`}>Affiliation/Institution</label>
               <input
@@ -100,7 +111,7 @@ const ResearcherProfile = ({
                 className="input-field"
               />
             </div>
-            
+  
             <div className="input-group">
               <label htmlFor={`researcher-area-${index}`}>Research Area</label>
               <select
@@ -116,20 +127,61 @@ const ResearcherProfile = ({
               </select>
             </div>
           </div>
-          
-          <div className="text-input-section">
-            <textarea
-              placeholder="Enter researcher profile information here..."
-              value={profile.text}
-              onChange={handleTextChange}
-              className="text-area"
-              rows="6"
-            ></textarea>
+  
+          <div className="input-method-toggle">
+            <button
+              className={`toggle-option ${profile.inputMethod === 'text' ? 'active' : ''}`}
+              onClick={() => updateProfile(index, { ...profile, inputMethod: 'text' })}
+            >
+              Enter Text
+            </button>
+            <button
+              className={`toggle-option ${profile.inputMethod === 'pdf' ? 'active' : ''}`}
+              onClick={() => updateProfile(index, { ...profile, inputMethod: 'pdf' })}
+            >
+              Upload PDF
+            </button>
           </div>
-          
+  
+          {profile.inputMethod === 'text' ? (
+            <div className="text-input-section">
+              <textarea
+                placeholder="Enter researcher profile information here..."
+                value={profile.text}
+                onChange={handleTextChange}
+                className="text-area"
+                rows="6"
+              />
+            </div>
+          ) : (
+            <div className="pdf-upload-section">
+              {profile.isProcessingPDF && (
+                <div className="loading-indicator">
+                  <span className="loading-spinner" /> Processing PDF...
+                </div>
+              )}
+              <label htmlFor={`pdf-upload-${index}`}>Upload PDF</label>
+              <input
+                id={`pdf-upload-${index}`}
+                type="file"
+                accept=".pdf"
+                onChange={handlePDFUpload}
+              />
+              {profile.pdfFile && (
+                <p className="pdf-filename">Selected: {profile.pdfFile.name}</p>
+              )}
+              {profile.text && (
+                <div className="pdf-preview-text">
+                  <h4>Extracted Text Preview:</h4>
+                  <p>{profile.text.length > 200 ? `${profile.text.substring(0, 200)}...` : profile.text}</p>
+                </div>
+              )}
+            </div>
+          )}
+  
           {!isFirst && (
             <div className="remove-profile-container">
-              <button 
+              <button
                 onClick={() => removeProfile(index)}
                 className="remove-profile-button"
               >
@@ -169,20 +221,28 @@ const HomePage = () => {
     setProfiles(updatedProfiles);
   };
 
-  // Function to call the extract_interests API
   const callExtractInterestsAPI = async (profiles) => {
+    const formData = new FormData();
+    
+    // Prepare profiles data without the pdfFile object (only name and description)
     const apiData = profiles.map(profile => ({
       name: profile.name,
       description: profile.text
     }));
+    
+    // Append profiles as JSON string
+    formData.append('profiles', JSON.stringify(apiData));
+    
+    // Append PDF files with corresponding indices
+    profiles.forEach((profile, index) => {
+      if (profile.pdfFile) {
+        formData.append(`pdf${index}`, profile.pdfFile);
+      }
+    });
 
-    const response = await fetch('/api/nsf/extract_interests', {
+    const response = await fetch('/api/nsf/nsf/extract_interests', {
       method: 'POST',
-      mode: "cors",
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(apiData),
+      body: formData, // No headers needed, FormData sets Content-Type automatically
     });
 
     if (!response.ok) {
@@ -195,15 +255,16 @@ const HomePage = () => {
   const handleSubmit = async () => {
     // Check for empty required fields
     const hasEmptyRequiredFields = profiles.some(profile => {
-      return !profile.name || !profile.affiliation || !profile.researchArea || !profile.text.trim();
+      return !profile.name || !profile.affiliation || !profile.researchArea || 
+             (!profile.text.trim() && !profile.pdfFile);
     });
 
     if (hasEmptyRequiredFields) {
-      alert('Please fill in all required fields for each researcher profile');
+      alert('Please fill in all required fields and provide either text or a PDF for each researcher profile');
       return;
     }
 
-    setIsLoading(true); // Show loading indicator
+    setIsLoading(true);
 
     try {
       const apiResponse = await callExtractInterestsAPI(profiles);
@@ -212,23 +273,24 @@ const HomePage = () => {
       alert('Error extracting research interests. Please try again.');
       console.error(error);
     } finally {
-      setIsLoading(false); // Hide loading indicator
+      setIsLoading(false);
     }
-    
   };
 
-  const hasValidData = profiles.some(profile => profile.text.trim() !== '');
+  const hasValidData = profiles.some(profile => profile.text.trim() !== '' || profile.pdfFile);
 
   return (
     <div className="homepage">
       <div className="container">
-        <div className="hero-section">
-          <h1>NSF Research Team Formation</h1>
-          <p>
-            Add researcher profiles to form interdisciplinary teams and generate 
-            competitive NSF research proposals using AI-powered analysis.
-          </p>
-        </div>
+          <div className="hero-section">
+            <div className="hero-content">
+              <h1>NSF Research Team Formation</h1>
+              <p>
+                Add researcher profiles to form interdisciplinary teams and generate 
+                competitive NSF research proposals using AI-powered analysis.
+              </p>
+            </div>
+          </div>
 
         <div className="main-card">
           <div className="profiles-container">
@@ -238,10 +300,10 @@ const HomePage = () => {
                 {profiles.length} of {MAX_RESEARCHERS} researchers added
               </p>
             </div>
-            
+
             <div className="profiles-list">
               {profiles.map((profile, index) => (
-                <ResearcherProfile 
+                <ResearcherProfile
                   key={index}
                   profile={profile}
                   index={index}
@@ -252,9 +314,9 @@ const HomePage = () => {
                 />
               ))}
             </div>
-            
+
             <div className="add-profile-container">
-              <button 
+              <button
                 onClick={addResearcherProfile}
                 disabled={profiles.length >= MAX_RESEARCHERS}
                 className={`add-profile-button ${profiles.length >= MAX_RESEARCHERS ? 'disabled' : ''}`}
@@ -268,9 +330,9 @@ const HomePage = () => {
                 <p className="max-limit-message">Maximum of 10 researchers reached</p>
               )}
             </div>
-            
+
             <div className="submit-container">
-              <button 
+              <button
                 onClick={handleSubmit}
                 disabled={!hasValidData || isLoading}
                 className={`submit-button ${!hasValidData || isLoading ? 'disabled' : ''}`}

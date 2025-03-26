@@ -1,3 +1,4 @@
+import PyPDF2
 import spacy
 import re
 
@@ -74,3 +75,15 @@ def extract_research_interests(text):
         if len(interests) >= 10:
             break
     return interests
+
+def extract_text_from_pdf(pdf_file):
+    """Extract text from a PDF file object."""
+    try:
+        pdf_reader = PyPDF2.PdfReader(pdf_file)
+        text = ""
+        for page in pdf_reader.pages:
+            text += page.extract_text() or ""
+        return text
+    except Exception as e:
+        print(f"Error extracting text from PDF: {e}")
+        return None
