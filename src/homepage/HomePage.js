@@ -240,7 +240,7 @@ const HomePage = () => {
       }
     });
 
-    const response = await fetch('/api/nsf/nsf/extract_interests', {
+    const response = await fetch('/api/nsf/extract_interests', {
       method: 'POST',
       body: formData, // No headers needed, FormData sets Content-Type automatically
     });
