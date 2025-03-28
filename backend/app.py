@@ -4,6 +4,7 @@ from flask_cors import CORS
 from src.config import Config  # Corrected import
 from src.routes.nsf_routes import nsf_bp  # Corrected import
 
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -19,7 +20,7 @@ def create_app():
     app.config.from_object(Config)
 
     # Configure CORS
-    CORS(app, origins=Config.CORS_ORIGINS)
+    CORS(app)
 
     # Register blueprints
     app.register_blueprint(nsf_bp)
@@ -27,8 +28,9 @@ def create_app():
     logger.info("Flask app initialized successfully")
     return app
 
+app = create_app()
+
 if __name__ == "__main__":
-    app = create_app()
     app.run(
         debug=Config.DEBUG,
         host=Config.HOST,
