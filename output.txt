@@ -1,0 +1,52 @@
+
+--- Page 1 ---
+Akshay Vilas Jadhav
+680-207-5848 |avjadhav@syr.edu |linkedin.com/in/jadhavakshay0701 |github.com/Akshay0701
+Education
+Syracuse University Syracuse, NY
+Master of Science in Computer Science, 3.4 GPA August 2023 – May 2025
+University of Mumbai Mumbai, India
+Bachelor’s Degree in Information Technology, 3.6 GPA August 2020 – May 2023
+Technical Skills
+Languages : Java, Javascript, Python, Kotlin, Swift, HTML, CSS, SQL, C, C++
+Frameworks : Node.js, React, Android SDK, IOS, Express.js, Flask, Restful API
+Database & Cloud : MongoDB, Firebase, MySQL, Google Cloud Platform, AWS
+Developer Tools : Git & GitHub, Postman APIs, Jira, Docker, CI, XCode, Linux
+Experience
+Research Assistant May 2024 – Present
+Syracuse University Syracuse, NY
+•Utilized Generative AI to design bioinspired materials, leading to over 200 patterns inspired by animal skin.
+•Achieved a 30% increase in impact resistance and a 20% improvement in heat dissipation efficiency in composite
+prototypes by mimicking natural animal patterns, validated through extensive computational simulations.
+•Trained Microsoft Phi3 Vision Model to analyze Differential Scanning Calorimetry (DSC) and Glass Transition
+Temperature data, achieving 92% accuracy across 500,000+ experimental dataset from research papers.
+•Experimented with CNN models to predict the loading curve of bamboo with 100k+ stimulated dataset.
+Software Developer Intern October 2023 – March 2024
+IConsult Collaborative Syracuse, NY
+•Developed app to help the firm expand its offline program to a digital platform, including over 5000 customers.
+•Created a personalized workout builder for users to design fitness plans of 300+ exercises, considering difficulty.
+•Engineered integration of Restful API into the app to seamlessly redirect users to thousands of workout videos.
+Frontend Developer Intern June 2021 – August 2021
+Intract Technologies Mumbai, India
+•Revamped Intract application codebase, fixed student book access bug, and improved UI for 10k+ Users.
+•Implemented calendar features, enabling teachers to easily set assignment deadline dates within the application.
+•Streamlined resource management by automating outdated resource deletion, saving teachers 2 hours weekly.
+Projects
+AnkiDroid, Open Source |Java, Kotlin, XML, SQL
+•Built user-requested features, resolved bugs, and contributed to maintaining Anki ecosystem serving a 2 million.
+•Constructed a FloatingActionMenu, removed two dependency to improve customization with Anki updates.
+•Designed a WYSIWYG editor that enabled users to create flashcards without HTML; increased creation by 40%.
+•Built thirty plus unit and integration test classes to ensure seamless functionality in future updates.
+•Migrated 100+ Java classes to Kotlin to improve maintainability and collaborated on 50+ peer reviews.
+NSF Team Collaboration |LLM, NumPy, React, Flask, Python, Javascript
+•Developed an AI-driven system that extracts researcher expertise from profiles using NLP techniques.
+•Integrated llama-3.3 model to generate tailored research project ideas per team for NSF funding.
+•Designed a scalable data pipeline leveraging TF-IDF, embedding models for researcher-team matching
+V-Share System |Java, Google Map API, Firebase, Node.js
+•Collaborated with a 5-member team to develop an application enabling users to donate resources to NGOs.
+•Innovated real-time tracking using Google Map API, enabling donors to monitor their goods and instant alerts,
+Facilitated the donation of 350+ educational resources to NGOs and rural schools in Mumbai.
+KidEaseHub, Autism Spectrum Disorder |Java, MongoDB, Firebase, Android
+•Formulated software utilizing thousand plus videos to enhance reading, writing skills for autistic children.
+•Executed click-board, task scheduling tools, and interactive learning games, resulting in a significant improvement
+in children’s cognitive skills and overall engagement with the application.
