@@ -59,8 +59,11 @@ const generateProposals = async (teams) => {
   return response.json();
 };
 
-export default {
+// Assign the object to a variable before exporting
+const nsfService = {
   extractInterests,
   createTeams,
   generateProposals,
 };
+
+export default nsfService;
