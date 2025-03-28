@@ -1,0 +1,7 @@
+flask
+flask-cors
+python-dotenv
+PyPDF2
+pydantic  # Optional for validation
+flasgger  # Optional for API docs
+pytest    # For testing
