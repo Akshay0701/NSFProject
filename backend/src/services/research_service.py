@@ -1,151 +1,126 @@
 import logging
-import re
 import spacy
+import re
+from collections import Counter
+from typing import List, Dict
 from src.utils.pdf_utils import extract_text_from_pdf
 from src.exceptions.custom_exceptions import InvalidInputError, ProcessingError
 
 logger = logging.getLogger(__name__)
 
-# Load spaCy's English model
+# Load spaCy's English model and add sentencizer
 nlp = spacy.load("en_core_web_sm")
+nlp.add_pipe("sentencizer")
 
-# Define a set of keywords that indicate non-research-field content
+# Domain-specific terms and banned words (same as before)
 BANNED_WORDS = {
     "bachelor", "master", "phd", "gpa", "university", "college", "experience",
     "technical", "skills", "research", "assistant", "degree", "certificate",
-    "project", "projects", "education", "contact", "email", "phone"
+    "project", "projects", "education", "contact", "email", "phone", "curriculum",
+    "vitae", "publication", "journal", "conference", "award", "grant", "teaching",
+    "mentoring", "supervising", "committee", "service", "workshop", "seminar"
 }
-
-# Define known acronyms and their preferred casing
-ACRONYMS = {"ai": "AI", "ml": "ML"}
+ACRONYMS = {"ai": "AI", "ml": "ML", "nlp": "NLP", "cv": "CV", "dl": "DL"}
 
 class ResearchService:
     @staticmethod
-    def normalize_candidate(candidate: str) -> str:
+    def normalize_phrase(phrase: str) -> str:
         """
-        Normalize a candidate phrase by lemmatizing and handling acronyms.
-
-        Args:
-            candidate (str): The candidate phrase to normalize.
-
-        Returns:
-            str: Normalized phrase.
+        Normalize a phrase: clean spacing, perform lemmatization and proper casing.
         """
-        doc = nlp(candidate)
-        lemmas = [token.lemma_.lower() for token in doc if not token.is_stop and token.is_alpha]
-        normalized = " ".join(lemmas)
-        # Use uppercase for known acronyms, otherwise title case
+        # Clean up spacing and special characters
+        phrase = re.sub(r"\s+", " ", phrase).strip()
+        doc = nlp(phrase)
+        words = [token.lemma_.lower() for token in doc if token.is_alpha and not token.is_stop]
+        normalized = " ".join(words)
+        # Handle known acronyms
         if normalized.lower() in ACRONYMS:
             return ACRONYMS[normalized.lower()]
-        else:
-            return normalized.title()
+        return normalized.title()
 
     @staticmethod
-    def is_valid_field(candidate: str) -> bool:
+    def extract_candidate_phrases(text: str) -> List[str]:
         """
-        Check if a candidate phrase is a valid research topic.
-
-        Args:
-            candidate (str): The candidate phrase to validate.
-
-        Returns:
-            bool: True if the candidate is a valid research topic, False otherwise.
+        Extract candidate multi-word phrases from the text.
+        Uses noun chunks with at least 2 words.
         """
-        candidate = candidate.strip()
-        # Skip if empty or contains digits
-        if not candidate or any(char.isdigit() for char in candidate):
-            return False
-        # Use spaCy NER to exclude specific entity types
-        doc = nlp(candidate)
-        for ent in doc.ents:
-            if ent.label_ in {"PERSON", "ORG", "GPE", "DATE", "TIME"}:
-                return False
-        # Tokenize and check length and acronyms
-        tokens = candidate.split()
-        if len(tokens) < 2 and candidate.lower() not in {"ai", "ml"}:
-            return False
-        # Exclude banned words
-        for token in tokens:
-            if token.lower() in BANNED_WORDS:
-                return False
-        return True
+        doc = nlp(text)
+        candidates = [chunk.text.strip() for chunk in doc.noun_chunks if len(chunk.text.strip().split()) >= 2]
+        return candidates
 
     @staticmethod
-    def extract_research_interests(text: str) -> list[str]:
+    def filter_valid_phrases(phrases: List[str]) -> List[str]:
         """
-        Extract research interests from a text description.
-
-        Args:
-            text (str): The text to extract research interests from.
-
-        Returns:
-            list[str]: List of extracted research interests.
+        Filter out phrases that contain banned words or don't pass the validation.
         """
-        logger.info("Extracting research interests from text")
-        interests = []
-        # Look for a "Research Interests" section
-        pattern = re.compile(
-            r"Research Interests\s*[:\-]?\s*(.*?)(?=\n[A-Z][a-z]+:|\n\n|\Z)",
-            re.IGNORECASE | re.DOTALL
-        )
-        match = pattern.search(text)
-        if match:
-            section_text = match.group(1).strip()
-            candidates = re.split(r'[,\n;]+', section_text)
-        else:
-            # Fallback to noun chunks from the entire text
-            doc = nlp(text)
-            candidates = [chunk.text for chunk in doc.noun_chunks]
-
-        # Normalize and filter candidates
-        seen = set()
-        for candidate in candidates:
-            normalized = ResearchService.normalize_candidate(candidate)
-            if ResearchService.is_valid_field(normalized):
-                if normalized.lower() not in seen:
-                    seen.add(normalized.lower())
-                    interests.append(normalized)
-            if len(interests) >= 10:
-                break
-        logger.debug(f"Extracted research interests: {interests}")
-        return interests
+        valid = []
+        for phrase in phrases:
+            normalized = ResearchService.normalize_phrase(phrase)
+            if not normalized:
+                continue
+            # Exclude phrases with banned words
+            if any(banned in normalized.lower() for banned in BANNED_WORDS):
+                continue
+            # Ensure phrase has at least 2 words (after normalization)
+            if len(normalized.split()) < 2 and normalized.lower() not in {"ai", "ml", "nlp"}:
+                continue
+            valid.append(normalized)
+        return valid
 
     @staticmethod
-    def extract_interests_from_profiles(profiles_data: list, request_files: dict) -> list[dict]:
+    def extract_research_interests(text: str) -> List[str]:
         """
-        Extract research interests from profiles with either text or PDF input.
+        Extract research interests by:
+          1. Extracting candidate multi-word phrases.
+          2. Filtering valid phrases.
+          3. Counting frequency and selecting top 10.
+        """
+        logger.info("Extracting research interests using frequency-based noun phrase extraction")
+        # Normalize text
+        clean_text = " ".join(text.split())
+        candidates = ResearchService.extract_candidate_phrases(clean_text)
+        valid_phrases = ResearchService.filter_valid_phrases(candidates)
+        
+        if not valid_phrases:
+            logger.warning("No valid candidate phrases extracted.")
+            return []
+        
+        # Count frequency of valid phrases
+        phrase_counts = Counter(valid_phrases)
+        # Get the top 10 most common phrases
+        top_phrases = [phrase for phrase, count in phrase_counts.most_common(10)]
+        return top_phrases
 
-        Args:
-            profiles_data (list): List of profile dictionaries with 'name' and 'description' keys.
-            request_files (dict): Dictionary of uploaded files from the request.
-
-        Returns:
-            list[dict]: List of dictionaries containing names and their research topics.
-
-        Raises:
-            InvalidInputError: If profiles data is missing or invalid.
+    @staticmethod
+    def extract_interests_from_profiles(profiles_data: List[Dict], request_files: Dict) -> List[Dict]:
+        """
+        Processes a list of researcher profiles (or PDFs) and extracts research interests.
+        Expects profiles_data as a list of dictionaries:
+            [{"name": "John Doe", "description": "Profile text..."}]
+        And request_files as a dict for PDF files, if applicable.
+        Returns a list of dictionaries:
+            [{"name": "John Doe", "research_topics": ["Topic1", "Topic2", ...]}]
         """
         if not profiles_data:
             raise InvalidInputError("No profiles data provided")
 
         results = []
         for index, profile in enumerate(profiles_data):
-            name = profile.get("name")
-            description = profile.get("description", "")
+            try:
+                name = profile.get("name")
+                description = profile.get("description", "")
+                # Handle PDF input if available
+                pdf_field = f"pdf{index}"
+                if pdf_field in request_files:
+                    description = extract_text_from_pdf(request_files[pdf_field])
+                
+                if not name or not description:
+                    logger.warning(f"Skipping profile {index}: missing name or description")
+                    continue
 
-            # Check if a PDF file is provided for this profile
-            pdf_field = f"pdf{index}"
-            if pdf_field in request_files:
-                pdf_file = request_files[pdf_field]
-                description = extract_text_from_pdf(pdf_file)
-
-            # Skip if name or description is missing
-            if not name or not description:
-                logger.warning(f"Skipping profile {index}: missing name or description")
+                topics = ResearchService.extract_research_interests(description)
+                results.append({"name": name, "research_topics": topics})
+            except Exception as e:
+                logger.error(f"Error processing profile {index}: {str(e)}")
                 continue
-
-            # Extract research interests
-            topics = ResearchService.extract_research_interests(description)
-            results.append({"name": name, "research_topics": topics})
-
         return results
