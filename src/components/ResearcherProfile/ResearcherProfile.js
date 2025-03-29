@@ -102,7 +102,7 @@ const ResearcherProfile = ({
                 updateProfile(index, { ...profile, inputMethod: 'text' })
               }
             >
-              Enter Text
+              Manually input expertise
             </button>
             <button
               className={`toggle-option ${profile.inputMethod === 'pdf' ? 'active' : ''}`}
@@ -110,7 +110,7 @@ const ResearcherProfile = ({
                 updateProfile(index, { ...profile, inputMethod: 'pdf' })
               }
             >
-              Upload PDF
+              Upload CV in pdf
             </button>
           </div>
 
