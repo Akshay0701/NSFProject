@@ -39,10 +39,9 @@ const HomePage = () => {
       <div className="container">
         <div className="hero-section">
           <div className="hero-content">
-            <h1>NSF Research Team Formation</h1>
+            <h1>Research Team Formation</h1>
             <p>
-              Add researcher profiles to form interdisciplinary teams and generate
-              competitive NSF research proposals using AI-powered analysis.
+              Add researcher profiles to facilitate the formation of interdisciplinary teams and generate competitive research proposals using AI-powered analysis.
             </p>
           </div>
         </div>
