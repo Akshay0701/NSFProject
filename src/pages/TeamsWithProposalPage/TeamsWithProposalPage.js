@@ -1,34 +1,59 @@
+// src/pages/TeamsWithProposalPage/TeamsWithProposalPage.js
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import useProfileStore from '../../store/profileStore';
-import TeamWithProposalsCard from '../../components/TeamWithProposalsCard';
+import useTeamsWithProposals from '../../hooks/useTeamsWithProposals';
+import TeamProposalCard from '../../components/TeamProposalCard';
+import PageHeader from '../../components/PageHeader';
 import './TeamsWithProposalPage.css';
 
 const TeamsWithProposalPage = () => {
-  const navigate = useNavigate();
-  const { teamsWithProposals } = useProfileStore();
+  const {
+    teamsWithProposals,
+    isLoading,
+    navigate,
+  } = useTeamsWithProposals();
+
+  const headerActions = (
+    <button onClick={() => navigate('/')} className="secondary-button">
+      ← Back to Home
+    </button>
+  );
 
   return (
-    <div className="teams-with-proposals-page">
-      <div className="header-container">
-        <h1>Research Teams with Project Proposals</h1>
-        <button onClick={() => navigate('/')} className="back-button">
-          ← Back to Home
-        </button>
-      </div>
+    <div className="room-page">
+      <PageHeader
+       title="Research Teams with Proposals"
+       subtitle={`${teamsWithProposals.length} ${teamsWithProposals.length === 1 ? 'team' : 'teams'} with proposals`}
+       actions={headerActions}
+      />
 
-      {teamsWithProposals.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-icon">🧑🔬</div>
-          <p>No teams data available. Please generate teams first.</p>
-        </div>
-      ) : (
-        <div className="teams-container">
-          {teamsWithProposals.map((team) => (
-            <TeamWithProposalsCard key={team.team_id} team={team} />
-          ))}
-        </div>
-      )}
+      <div className="content-container">
+        {isLoading ? (
+          <div className="loading-container">
+            <div className="loading-spinner"></div>
+            <p>Loading teams...</p>
+          </div>
+        ) : teamsWithProposals.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-icon">
+              <span role="img" aria-label="Research">👥</span>
+            </div>
+            <h3>No Teams Available</h3>
+            <p>Generate teams and proposals to view them here</p>
+            <button
+              onClick={() => navigate(-1)}
+              className="primary-button"
+            >
+              Go Back
+            </button>
+          </div>
+        ) : (
+          <div className="teams-proposals-list">
+            {teamsWithProposals.map((team) => (
+              <TeamProposalCard key={team.team_id} team={team} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };

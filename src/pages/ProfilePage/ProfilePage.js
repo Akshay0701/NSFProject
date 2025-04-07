@@ -1,75 +1,62 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import useProfileStore from '../../store/profileStore';
-import useCreateTeams from '../../hooks/useCreateTeams';
 import './ProfilePage.css';
+import useProfilePage from '../../hooks/useProfilePage';
+import ProfileCard from '../../components/ProfileCard';
+import PageHeader from '../../components/PageHeader';
 
 const ProfilePage = () => {
-  const navigate = useNavigate();
-  const { extractedProfiles, isCreatingTeams } = useProfileStore();
-  const { createTeams } = useCreateTeams();
+  const {
+    profiles,
+    navigate,
+    isCreatingTeams,
+    handleGenerateTeams
+  } = useProfilePage();
 
   return (
-    <div className="profile-page">
-      <header className="page-header">
-        <h1 className="page-title">Researcher Profiles</h1>
-        <div className="header-actions">
-          <button onClick={() => navigate('/')} className="back-button">
+    <div className="room-page">
+      <PageHeader
+        title="Research Profiles"
+        subtitle={`${profiles.length} ${profiles.length === 1 ? 'profile' : 'profiles'} extracted`}
+        actions={
+          <button onClick={() => navigate('/')} className="secondary-button">
             ← Back to Home
           </button>
-        </div>
-      </header>
+        }
+      />
 
-      {extractedProfiles.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-icon">🧑🔬</div>
-          <p className="empty-message">
-            No profiles available. Please submit researcher profiles from the homepage.
-          </p>
-        </div>
-      ) : (
-        <div className="profiles-grid">
-          {extractedProfiles.map((profile, index) => (
-            <div key={index} className="profile-card">
-              <div className="card-header">
-                <h2 className="researcher-name">{profile.name}</h2>
-                {profile.affiliation && (
-                  <p className="affiliation">{profile.affiliation}</p>
-                )}
-              </div>
-
-              <div className="research-section">
-                <h3 className="section-title">Research Topics</h3>
-                {profile.research_topics?.length > 0 ? (
-                  <div className="topics-container">
-                    {profile.research_topics.map((topic, idx) => (
-                      <span key={idx} className="topic-tag">{topic}</span>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="no-topics">No research topics extracted</p>
-                )}
-              </div>
+      <div className="content-container">
+        {profiles.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-icon">🔬</div>
+            <h3>No Profiles Available</h3>
+            <p>Extract research profiles from the room page to get started</p>
+            <button onClick={() => navigate('/')} className="primary-button">
+              Go to Homepage
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="profile-grid">
+              {profiles.map((profile, idx) => (
+                <ProfileCard key={idx} profile={profile} />
+              ))}
             </div>
-          ))}
-        </div>
-      )}
 
-      <div className="actions-container">
-        <button
-          onClick={createTeams}
-          disabled={isCreatingTeams || extractedProfiles.length === 0}
-          className={`create-teams-button ${isCreatingTeams ? 'loading' : ''}`}
-        >
-          {isCreatingTeams ? (
-            <>
-              <div className="loading-spinner"></div>
-              Generating Teams...
-            </>
-          ) : (
-            'Create Research Teams'
-          )}
-        </button>
+            <div className="generate-teams-container">
+              <button
+                className="generate-teams-btn"
+                onClick={handleGenerateTeams}
+                disabled={isCreatingTeams || profiles.length === 0}
+              >
+                {isCreatingTeams ? (
+                  'Creating Teams...'
+                ) : (
+                  'Generate Research Teams'
+                )}
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

@@ -1,83 +1,71 @@
+// src/pages/TeamPage/TeamPage.js
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import useProfileStore from '../../store/profileStore';
-import useGenerateProposals from '../../hooks/useGenerateProposals';
+import useTeamPage from '../../hooks/useTeamPage';
 import './TeamPage.css';
+import PageHeader from '../../components/PageHeader';
+import TeamCard from '../../components/TeamCard';
 
 const TeamPage = () => {
-  const navigate = useNavigate();
-  const { teams, isGeneratingProposals } = useProfileStore();
-  const { generateProposals } = useGenerateProposals();
+  const {
+    roomId,
+    teams,
+    loading,
+    isGeneratingProposals,
+    navigate,
+    handleGenerateProposals
+  } = useTeamPage();
+
+  const headerActions = (
+    <button onClick={() => navigate('/')} className="secondary-button">
+      ← Back to Home
+    </button>
+  );
 
   return (
-    <div className="team-page">
-      <header className="page-header">
-        <h1>Research Teams</h1>
-        <div className="header-controls">
-          <button onClick={() => navigate('/')} className="back-button">
-            ← Back to Home
-          </button>
-          <button
-            onClick={generateProposals}
-            className={`generate-button ${isGeneratingProposals ? 'loading' : ''}`}
-            disabled={isGeneratingProposals || teams.length === 0}
-          >
-            {isGeneratingProposals ? (
-              <>
-                <div className="spinner"></div>
-                Generating...
-              </>
-            ) : (
-              'Generate Proposals'
-            )}
-          </button>
-        </div>
-      </header>
+    <div className="room-page">
+      <PageHeader
+        title="Research Teams"
+        subtitle={`${teams.length} ${teams.length === 1 ? 'team' : 'teams'} formed`}
+        actions={headerActions}
+      />
 
-      {teams.length === 0 ? (
-        <div className="empty-state">
-          <div className="empty-icon">🧑🔬</div>
-          <p>No teams available. Please create teams first.</p>
-        </div>
-      ) : (
-        <div className="teams-grid">
-          {teams.map((team) => (
-            <div key={team.team_id} className="team-card">
-              <div className="card-header">
-                <h2>Team #{team.team_id}</h2>
-                <span className="team-size">
-                  {team.team_size} member{team.team_size > 1 ? 's' : ''}
-                </span>
-              </div>
-
-              <div className="card-section">
-                <h3 className="section-title">Research Focus Areas</h3>
-                <div className="tags-container">
-                  {team.team_research_areas.map((area, idx) => (
-                    <span key={idx} className="research-tag">{area}</span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="card-section">
-                <h3 className="section-title">Team Members</h3>
-                <div className="members-list">
-                  {team.members.map((member) => (
-                    <div key={member} className="member-item">
-                      <div className="member-name">{member}</div>
-                      <div className="member-fields">
-                        {team.member_fields[member].map((field, idx) => (
-                          <span key={idx} className="field-tag">{field}</span>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+      <div className="content-container">
+        {loading ? (
+          <div className="loading-rooms">
+            <div className="spinner"></div>
+            <p>Loading teams...</p>
+          </div>
+        ) : teams.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-icon">
+              <span role="img" aria-label="Team">👥</span>
             </div>
-          ))}
-        </div>
-      )}
+            <h3>No Teams Available</h3>
+            <p>Generate teams from researcher profiles to get started</p>
+            <button onClick={() => navigate(`/room/${roomId}/profiles`)} className="primary-button">
+              View Profiles
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="profile-grid">
+              {teams.map((team) => (
+                <TeamCard key={team.team_id} team={team} />
+              ))}
+            </div>
+
+            <div className="generate-teams-container">
+              <button
+                className="generate-teams-btn"
+                onClick={handleGenerateProposals}
+                disabled={isGeneratingProposals || teams.length === 0}
+              >
+                {isGeneratingProposals ? 'Generating Proposals...' : 'Generate Research Proposals'}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 };
