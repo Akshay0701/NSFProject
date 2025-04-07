@@ -1,0 +1,275 @@
+/* TeamProposalCard.css */
+
+/* ===== Core Card Styles ===== */
+.proposal-team-wrapper {
+  display: flex;
+  gap: 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ===== Left Panel: Team Details ===== */
+.proposal-team-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* ===== Right Panel: Projects ===== */
+.proposal-team-projects {
+  flex: 1.5;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  border-left: 1px solid var(--border);
+  padding-left: 1.5rem;
+}
+
+/* ===== Header Section (Team Title Bar) ===== */
+.proposal-team-title-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.proposal-team-title-bar h2 {
+  font-size: 1.25rem;
+  color: var(--text-primary);
+  margin: 0;
+  font-weight: 600;
+}
+
+.proposal-team-size {
+  background: var(--background);
+  color: var(--text-secondary);
+  padding: 0.375rem 0.75rem;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  border: 1px solid var(--border);
+}
+
+/* ===== Content Sections (Research Focus, Members) ===== */
+.proposal-team-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.proposal-team-heading {
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin: 0 0 0.75rem 0;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.proposal-team-icon {
+  font-size: 1.25rem;
+}
+
+/* ===== Tags & Topics (Research Areas) ===== */
+.proposal-team-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.proposal-team-research-label {
+  background: var(--background);
+  color: var(--text-primary);
+  padding: 0.375rem 0.75rem;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  border: 1px solid var(--border);
+}
+
+/* ===== Members List ===== */
+.proposal-team-members {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.proposal-team-member {
+  padding: 0.25rem 0;
+}
+
+.proposal-team-member-name {
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.proposal-team-member-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.proposal-team-skill-label {
+  background: var(--background);
+  color: var(--text-secondary);
+  padding: 0.25rem 0.65rem;
+  border-radius: 0.75rem;
+  font-size: 0.8125rem;
+  border: 1px solid var(--border);
+}
+
+/* ===== Projects Section ===== */
+.proposal-team-projects-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.proposal-team-projects-title h3 {
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin: 0;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.proposal-team-projects-count {
+  background: var(--background);
+  color: var(--text-secondary);
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  border: 1px solid var(--border);
+}
+
+/* ===== Projects List ===== */
+.proposal-team-projects-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Show More Button */
+.proposal-team-show-more {
+  background: var(--background);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.2s ease;
+}
+
+.proposal-team-show-more:hover {
+  background: var(--surface);
+}
+
+/* ===== Individual Project Item ===== */
+.proposal-team-project-item {
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+/* Project Header */
+.proposal-team-project-header {
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.proposal-team-project-header h4 {
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Project Body */
+.proposal-team-project-body {
+  padding-top: 0.25rem;
+}
+
+.proposal-team-project-text {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* No Projects Message */
+.proposal-team-no-projects {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-style: italic;
+  text-align: center;
+  padding: 1rem;
+}
+
+/* ===== Responsive Adjustments ===== */
+@media (max-width: 768px) {
+  .proposal-team-wrapper {
+    flex-direction: column;
+    padding: 1.25rem;
+  }
+
+  .proposal-team-projects {
+    border-left: none;
+    border-top: 1px solid var(--border);
+    padding-left: 0;
+    padding-top: 1.5rem;
+  }
+
+  .proposal-team-title-bar h2 {
+    font-size: 1.125rem;
+  }
+
+  .proposal-team-size,
+  .proposal-team-projects-count {
+    font-size: 0.8125rem;
+    padding: 0.25rem 0.65rem;
+  }
+
+  .proposal-team-heading {
+    font-size: 0.9375rem;
+  }
+
+  .proposal-team-research-label {
+    font-size: 0.8125rem;
+    padding: 0.25rem 0.65rem;
+  }
+
+  .proposal-team-skill-label {
+    font-size: 0.75rem;
+  }
+
+  .proposal-team-member-name {
+    font-size: 0.875rem;
+  }
+
+  .proposal-team-project-text {
+    font-size: 0.8125rem;
+  }
+
+  .proposal-team-show-more {
+    font-size: 0.8125rem;
+    padding: 0.4rem 0.8rem;
+  }
+}
