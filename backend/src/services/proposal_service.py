@@ -1,4 +1,8 @@
 import os
+from aiohttp import ClientError
+import boto3
+from dotenv import load_dotenv
+from flask import jsonify
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -6,7 +10,8 @@ from langchain_groq import ChatGroq
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.exceptions import OutputParserException
-from dotenv import load_dotenv
+from src.utils.response_utils import error_response, success_response
+from src.database.database import get_room_by_id, update_room_item
 
 load_dotenv()
 
@@ -14,7 +19,7 @@ class NSFProjectChain:
     def __init__(self, excel_path='AwardsMRSEC.xls'):
         self.chat = ChatGroq(
             temperature=0,
-            groq_api_key=os.getenv("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"),
+            groq_api_key= os.environ.get("GROQ_API_KEY"),
             model_name="llama-3.3-70b-versatile"
         )
         self.excel_path = excel_path
@@ -117,3 +122,40 @@ class NSFProjectChain:
                 team["project_proposals"] = [f"Error generating proposals: {str(e)}"]
 
         return teams
+    
+    def generate_proposals_for_room(self, data):
+        room_id = data.get("RoomID")
+        if not room_id:
+            return error_response("Room ID is required", 400)
+
+        try:
+            # Step 1: Fetch room data
+            response = get_room_by_id(room_id)
+            room_item = response.get("Item")
+
+            if not room_item:
+                return error_response("Room not found", 404)
+
+            teams = room_item.get("teams", [])
+            if not teams:
+                return error_response("No teams available to generate proposals", 400)
+
+            # Step 2: Generate proposals using NSFProjectChain
+            updated_teams = self.generate_proposals(teams)
+
+            # Step 3: Update teams in the database
+            update_room_item(
+                room_id=room_id,
+                update_expression="SET teams = :teams",
+                expression_attr_values={":teams": updated_teams}
+            )
+
+            return success_response({
+                "message": "Proposals generated successfully",
+                "teams": updated_teams
+            }, 200)
+
+        except ClientError as e:
+            return error_response(str(e), 500)
+        except Exception as e:
+            return error_response(str(e), 500)

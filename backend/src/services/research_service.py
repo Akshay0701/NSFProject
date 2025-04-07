@@ -1,18 +1,22 @@
 import logging
-import spacy
 import re
+import spacy
 from collections import Counter
 from typing import List, Dict
+from flask import jsonify
+from src.utils.response_utils import error_response, success_response
 from src.utils.pdf_utils import extract_text_from_pdf
-from src.exceptions.custom_exceptions import InvalidInputError, ProcessingError
+from src.exceptions.custom_exceptions import InvalidInputError
+from src.database.database import get_room_by_id, update_room_item
+from bs4 import BeautifulSoup
+import requests
 
 logger = logging.getLogger(__name__)
 
-# Load spaCy's English model and add sentencizer
+# Load spaCy model
 nlp = spacy.load("en_core_web_sm")
 nlp.add_pipe("sentencizer")
 
-# Domain-specific terms and banned words (same as before)
 BANNED_WORDS = {
     "bachelor", "master", "phd", "gpa", "university", "college", "experience",
     "technical", "skills", "research", "assistant", "degree", "certificate",
@@ -25,43 +29,28 @@ ACRONYMS = {"ai": "AI", "ml": "ML", "nlp": "NLP", "cv": "CV", "dl": "DL"}
 class ResearchService:
     @staticmethod
     def normalize_phrase(phrase: str) -> str:
-        """
-        Normalize a phrase: clean spacing, perform lemmatization and proper casing.
-        """
-        # Clean up spacing and special characters
         phrase = re.sub(r"\s+", " ", phrase).strip()
         doc = nlp(phrase)
         words = [token.lemma_.lower() for token in doc if token.is_alpha and not token.is_stop]
         normalized = " ".join(words)
-        # Handle known acronyms
         if normalized.lower() in ACRONYMS:
             return ACRONYMS[normalized.lower()]
         return normalized.title()
 
     @staticmethod
     def extract_candidate_phrases(text: str) -> List[str]:
-        """
-        Extract candidate multi-word phrases from the text.
-        Uses noun chunks with at least 2 words.
-        """
         doc = nlp(text)
-        candidates = [chunk.text.strip() for chunk in doc.noun_chunks if len(chunk.text.strip().split()) >= 2]
-        return candidates
+        return [chunk.text.strip() for chunk in doc.noun_chunks if len(chunk.text.strip().split()) >= 2]
 
     @staticmethod
     def filter_valid_phrases(phrases: List[str]) -> List[str]:
-        """
-        Filter out phrases that contain banned words or don't pass the validation.
-        """
         valid = []
         for phrase in phrases:
             normalized = ResearchService.normalize_phrase(phrase)
             if not normalized:
                 continue
-            # Exclude phrases with banned words
             if any(banned in normalized.lower() for banned in BANNED_WORDS):
                 continue
-            # Ensure phrase has at least 2 words (after normalization)
             if len(normalized.split()) < 2 and normalized.lower() not in {"ai", "ml", "nlp"}:
                 continue
             valid.append(normalized)
@@ -69,38 +58,20 @@ class ResearchService:
 
     @staticmethod
     def extract_research_interests(text: str) -> List[str]:
-        """
-        Extract research interests by:
-          1. Extracting candidate multi-word phrases.
-          2. Filtering valid phrases.
-          3. Counting frequency and selecting top 10.
-        """
-        logger.info("Extracting research interests using frequency-based noun phrase extraction")
-        # Normalize text
+        logger.info("Extracting research interests")
         clean_text = " ".join(text.split())
         candidates = ResearchService.extract_candidate_phrases(clean_text)
         valid_phrases = ResearchService.filter_valid_phrases(candidates)
-        
+
         if not valid_phrases:
             logger.warning("No valid candidate phrases extracted.")
             return []
-        
-        # Count frequency of valid phrases
+
         phrase_counts = Counter(valid_phrases)
-        # Get the top 10 most common phrases
-        top_phrases = [phrase for phrase, count in phrase_counts.most_common(10)]
-        return top_phrases
+        return [phrase for phrase, count in phrase_counts.most_common(10)]
 
     @staticmethod
     def extract_interests_from_profiles(profiles_data: List[Dict], request_files: Dict) -> List[Dict]:
-        """
-        Processes a list of researcher profiles (or PDFs) and extracts research interests.
-        Expects profiles_data as a list of dictionaries:
-            [{"name": "John Doe", "description": "Profile text..."}]
-        And request_files as a dict for PDF files, if applicable.
-        Returns a list of dictionaries:
-            [{"name": "John Doe", "research_topics": ["Topic1", "Topic2", ...]}]
-        """
         if not profiles_data:
             raise InvalidInputError("No profiles data provided")
 
@@ -109,11 +80,10 @@ class ResearchService:
             try:
                 name = profile.get("name")
                 description = profile.get("description", "")
-                # Handle PDF input if available
                 pdf_field = f"pdf{index}"
                 if pdf_field in request_files:
                     description = extract_text_from_pdf(request_files[pdf_field])
-                
+
                 if not name or not description:
                     logger.warning(f"Skipping profile {index}: missing name or description")
                     continue
@@ -124,3 +94,92 @@ class ResearchService:
                 logger.error(f"Error processing profile {index}: {str(e)}")
                 continue
         return results
+
+    @staticmethod
+    def extract_research_from_room(data):
+        room_id = data.get("RoomID")
+        if not room_id:
+            return error_response("Room ID is required", 400)
+
+        try:
+            data = get_room_by_id(room_id)
+            if "Item" not in data:
+                return error_response("Room not found", 404)
+
+            room_data = data["Item"]
+            profiles = room_data.get("profiles", {})
+
+            profile_list = [
+                {"name": p["name"], "description": p.get("description", "")}
+                for p in profiles.values()
+                if p.get("name") and p.get("description")
+            ]
+
+            extracted = ResearchService.extract_interests_from_profiles(profile_list, {})
+
+            update_room_item(
+                room_id=room_id,
+                update_expression="SET extracted_keywords = :keywords",
+                expression_attr_values={":keywords": extracted}
+            )
+
+            return success_response({
+                "message": "Research interests extracted successfully",
+                "keywords": extracted
+            })
+
+        except Exception as e:
+            import traceback
+            print("Exception during research extraction:", traceback.format_exc())
+            return error_response(str(e), 500)
+
+    @staticmethod
+    def get_extracted_keywords(data):
+        room_id = data.get("RoomID")
+        if not room_id:
+            return error_response("RoomID is required", 400)
+
+        try:
+            data = get_room_by_id(room_id)
+            if "Item" not in data:
+                return error_response("Room not found", 404)
+
+            room_data = data["Item"]
+            keywords = room_data.get("extracted_keywords", [])
+
+            return success_response(keywords)
+
+        except Exception as e:
+            return error_response(str(e), 500)
+
+    @staticmethod
+    def extract_text_from_uploaded_pdf(pdf_file):
+        try:
+            extracted_text = extract_text_from_pdf(pdf_file)
+            return success_response({"text": extracted_text})
+        except Exception as e:
+            return error_response(str(e), 500)
+        
+    @staticmethod
+    def extract_text_from_url(data):
+        url = data.get('url')
+
+        if not url:
+            return jsonify({'error': 'URL is required'}), 400
+
+        try:
+            response = requests.get(url, timeout=10)
+            response.raise_for_status()
+
+            soup = BeautifulSoup(response.text, 'html.parser')
+
+            # Remove script and style elements
+            for tag in soup(['script', 'style']):
+                tag.decompose()
+
+            text = soup.get_text(separator=' ', strip=True)
+
+            return success_response({'url': url, 'text': text[:10000]}) # Limiting for safety
+
+        except requests.exceptions.RequestException as e:
+            return error_response(str(e), 500)

@@ -1,7 +1,10 @@
 import logging
-import numpy as np
+from aiohttp import ClientError
+from flask import jsonify
 import scipy
 from sklearn.feature_extraction.text import TfidfVectorizer
+from src.utils.response_utils import error_response, success_response
+from src.database.database import get_room_by_id, update_room_item
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
 from collections import Counter
@@ -180,3 +183,44 @@ class TeamService:
             output.append(team_data)
 
         return output
+    
+    @staticmethod
+    def create_teams_from_room(data):
+        room_id = data.get("RoomID")
+        if not room_id:
+            return error_response("Room ID is required", 400)
+
+        try:
+            # Step 1: Fetch room item
+            response = get_room_by_id(room_id)
+            room_item = response.get("Item")
+
+            if not room_item:
+                return error_response("Room not found", 404)
+
+            extracted_profiles = room_item.get("extracted_keywords", [])
+
+            if not extracted_profiles:
+                return error_response("No extracted keywords found for this room", 400)
+
+            # Step 2: Use service to create teams
+            teams = TeamService.create_teams(extracted_profiles)
+
+            # Step 3: Update room with new teams
+            update_room_item(
+                room_id=room_id,
+                update_expression="SET teams = :teams",
+                expression_attr_values={":teams": teams}
+            )
+
+            return success_response({
+                "message": "Teams created successfully",
+                "teams": teams
+            })
+
+        except ClientError as e:
+            return error_response(str(e), 500)
+        except InvalidInputError as ie:
+            return error_response(str(ie), 400)
+        except Exception as e:
+            return error_response(str(e), 500)
