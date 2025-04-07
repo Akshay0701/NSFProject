@@ -31,10 +31,9 @@ def create_app():
     logger.info("Flask app initialized successfully")
     return app
 
-if __name__ == "__main__":
-    app = create_app()
-    app.run(
-        debug=Config.DEBUG,
-        host=Config.HOST,
-        port=Config.PORT
-    )
+app = create_app()
+app.run(
+    debug=Config.DEBUG,
+    host=Config.HOST,
+    port=Config.PORT
+)
