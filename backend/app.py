@@ -32,8 +32,10 @@ def create_app():
     return app
 
 app = create_app()
-app.run(
-    debug=Config.DEBUG,
-    host=Config.HOST,
-    port=Config.PORT
-)
+
+if __name__ == "__main__":
+    app.run(
+        debug=Config.DEBUG,
+        host=Config.HOST,
+        port=Config.PORT
+    )
