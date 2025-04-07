@@ -1,4 +1,4 @@
-const BASE_URL = 'api/nsf/auth';
+const BASE_URL = '/api/nsf/auth';
 
 const login = async (email, password) => {
   const response = await fetch(`${BASE_URL}/login`, {

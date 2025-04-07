@@ -1,4 +1,4 @@
-const BASE_URL = 'api/nsf/room';
+const BASE_URL = '/api/nsf/room';
 
 const getRoomData = async (roomId) => {
   const response = await fetch(`${BASE_URL}/get-room/${roomId}`);

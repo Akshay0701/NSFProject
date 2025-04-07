@@ -1,4 +1,4 @@
-const BASE_URL = 'api/nsf/room';
+const BASE_URL = '/api/nsf/room';
 
 const generateProposalsForRoom = async (roomID) => {
   const response = await fetch(`${BASE_URL}/generate-proposals`, {
