@@ -4,7 +4,7 @@ from src.services.proposal_service import NSFProjectChain
 from src.services.research_service import ResearchService
 from src.services.team_service import TeamService
 
-compute_bp = Blueprint('compute', __name__, url_prefix="/room")
+compute_bp = Blueprint('nsf/compute', __name__, url_prefix="/nsf/room")
 
 @compute_bp.route('/extract-pdf-text', methods=['POST'])
 def extract_pdf_text_route():

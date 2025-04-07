@@ -8,7 +8,7 @@ from src.services.proposal_service import NSFProjectChain  # Updated import
 from src.utils.response_utils import success_response, error_response
 from src.exceptions.custom_exceptions import APIException
 
-auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
+auth_bp = Blueprint("nsf/auth", __name__, url_prefix="/nsf/auth")
 
 @auth_bp.route("/register", methods=["POST"])
 def register():

@@ -9,7 +9,7 @@ from src.services.room_service import (
     get_teams_data,
 )
 
-room_bp = Blueprint('room', __name__, url_prefix="/room")
+room_bp = Blueprint('nsf/room', __name__, url_prefix="/nsf/room")
 
 @room_bp.route('/create-room', methods=['POST'])
 def create_room_route():
