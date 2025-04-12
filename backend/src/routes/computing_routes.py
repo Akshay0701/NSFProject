@@ -23,6 +23,11 @@ def extract_keywords():
     data = request.get_json()
     return ResearchService.extract_research_from_room(data)
 
+@compute_bp.route('/update-keywords', methods=['POST'])
+def update_keywords():
+    data = request.get_json()
+    return ResearchService.update_research_topics_for_user(data)
+
 @compute_bp.route('/get-extracted-keywords', methods=['POST'])
 def get_extract_keywords():
     data = request.get_json()

@@ -7,6 +7,7 @@ from src.services.room_service import (
     get_rooms_by_email,
     remove_room,
     get_teams_data,
+    get_added_room_data
 )
 
 room_bp = Blueprint('nsf/room', __name__, url_prefix="/nsf/room")
@@ -14,8 +15,12 @@ room_bp = Blueprint('nsf/room', __name__, url_prefix="/nsf/room")
 @room_bp.route('/create-room', methods=['POST'])
 def create_room_route():
     data = request.get_json()
-    creator_id = data.get("creator_id")
-    return create_room(creator_id)
+    return create_room(data)
+
+@room_bp.route('/get-added-room', methods=['POST'])
+def get_added_room_data_route():
+    data = request.get_json()
+    return get_added_room_data(data)
 
 @room_bp.route('/get-room/<room_id>', methods=['GET'])
 def get_room_data_route(room_id):
@@ -46,3 +51,4 @@ def remove_room_route():
 def get_teams():
     data = request.get_json()
     return get_teams_data(data)
+
