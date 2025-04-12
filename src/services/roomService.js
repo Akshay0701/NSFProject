@@ -38,11 +38,19 @@ const removeProfileFromRoom = async ({ roomID, email, senderEmail }) => {
   return response.json();
 };
 
-const createRoom = async (creatorID) => {
+const createRoom = async (creatorID, roomID = null) => {
+  const bodyData = {
+    creator_id: creatorID,
+  };
+
+  if (roomID) {
+    bodyData.RoomID = roomID;  // Send custom Room ID to backend
+  }
+
   const response = await fetch(`${BASE_URL}/create-room`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ creator_id: creatorID }),
+    body: JSON.stringify(bodyData),
   });
 
   if (!response.ok) {
@@ -50,7 +58,7 @@ const createRoom = async (creatorID) => {
     throw new Error(error.error || 'Failed to create room');
   }
 
-  return response.json();  // { message: "...", RoomID: "..." }
+  return response.json();  // returns { message, RoomID }
 };
 
 const getRoomsByEmail = async (email) => {
@@ -113,9 +121,25 @@ const getTeamsByRoom = async (roomID) => {
   return response.json(); // Expected to be an array of teams
 };
 
+const getAddedRoomsByEmail = async (email) => {
+  const response = await fetch(`${BASE_URL}/get-added-room`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to fetch added rooms');
+  }
+
+  return response.json(); // Expected to be { rooms: [...] }
+};
+
 export default {
   getRoomData,
   getTeamsByRoom,
+  getAddedRoomsByEmail,
   addProfileToRoom,
   removeProfileFromRoom,
   createRoom,

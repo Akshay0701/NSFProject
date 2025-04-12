@@ -17,6 +17,7 @@ const useRegisterPage = () => {
       const data = await authService.register(email, password);
       toast.success('Registration successful! Please log in.');
       localStorage.setItem('authToken', data.tokens.AccessToken);
+      localStorage.setItem('refreshToken', data.tokens.RefreshToken);
       localStorage.setItem('userEmail', email); // store token if needed
       navigate('/intro');
     } catch (error) {
@@ -27,21 +28,47 @@ const useRegisterPage = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-
-    if (!email || !password || !confirmPassword) {
+  
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+    const trimmedConfirmPassword = confirmPassword.trim();
+  
+    // Empty fields check
+    if (!trimmedEmail || !trimmedPassword || !trimmedConfirmPassword) {
       toast.error('Please fill out all fields.');
       return;
     }
-
-    if (password !== confirmPassword) {
+  
+    // Email format check
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
+      toast.error('Please enter a valid email address.');
+      return;
+    }
+  
+    // Password strength check
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/;
+    if (!passwordRegex.test(trimmedPassword)) {
+      toast.error(
+        'Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.'
+      );
+      return;
+    }
+  
+    // Confirm password match
+    if (trimmedPassword !== trimmedConfirmPassword) {
       toast.error('Passwords do not match.');
       return;
     }
-
-    setLoading(true);
-    await registerUser(email, password);
-    setLoading(false);
+  
+    try {
+      setLoading(true);
+      await registerUser(trimmedEmail, trimmedPassword);
+    } finally {
+      setLoading(false);
+    }
   };
+  
 
   const toggleShowPassword = () => setShowPassword((prev) => !prev);
   const toggleShowConfirmPassword = () => setShowConfirmPassword((prev) => !prev);

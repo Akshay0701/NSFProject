@@ -68,32 +68,34 @@ class ResearchService:
             return []
 
         phrase_counts = Counter(valid_phrases)
-        return [phrase for phrase, count in phrase_counts.most_common(10)]
+        return [phrase for phrase, _ in phrase_counts.most_common(10)]
 
     @staticmethod
-    def extract_interests_from_profiles(profiles_data: List[Dict], request_files: Dict) -> List[Dict]:
+    def extract_interests_from_profiles(profiles_data: List[Dict], request_files: Dict) -> Dict[str, Dict]:
         if not profiles_data:
             raise InvalidInputError("No profiles data provided")
 
-        results = []
+        results = {}
         for index, profile in enumerate(profiles_data):
             try:
                 name = profile.get("name")
+                email = profile.get("email")
                 description = profile.get("description", "")
-                pdf_field = f"pdf{index}"
-                if pdf_field in request_files:
-                    description = extract_text_from_pdf(request_files[pdf_field])
-
-                if not name or not description:
-                    logger.warning(f"Skipping profile {index}: missing name or description")
+                if not name or not description or not email:
                     continue
 
-                topics = ResearchService.extract_research_interests(description)
-                results.append({"name": name, "research_topics": topics})
+                topics_map = ResearchService.extract_research_interests(description)
+
+                results[email] = {
+                    "name": name,
+                    "email": email,
+                    "research_topics": topics_map
+                }
             except Exception as e:
-                logger.error(f"Error processing profile {index}: {str(e)}")
                 continue
+
         return results
+
 
     @staticmethod
     def extract_research_from_room(data):
@@ -110,13 +112,15 @@ class ResearchService:
             profiles = room_data.get("profiles", {})
 
             profile_list = [
-                {"name": p["name"], "description": p.get("description", "")}
+                {"name": p["name"], "email": p["email"], "description": p.get("description", "")}
                 for p in profiles.values()
-                if p.get("name") and p.get("description")
+                if p.get("name") and p.get("description") and p["email"]
             ]
 
+            # Use your extraction service
             extracted = ResearchService.extract_interests_from_profiles(profile_list, {})
 
+            # Store result in DynamoDB as a map (list of maps)
             update_room_item(
                 room_id=room_id,
                 update_expression="SET extracted_keywords = :keywords",
@@ -145,10 +149,8 @@ class ResearchService:
                 return error_response("Room not found", 404)
 
             room_data = data["Item"]
-            keywords = room_data.get("extracted_keywords", [])
 
-            return success_response(keywords)
-
+            return success_response(room_data)
         except Exception as e:
             return error_response(str(e), 500)
 
@@ -182,4 +184,37 @@ class ResearchService:
             return success_response({'url': url, 'text': text[:10000]}) # Limiting for safety
 
         except requests.exceptions.RequestException as e:
+            return error_response(str(e), 500)
+        
+    @staticmethod
+    def update_research_topics_for_user(data):
+        room_id = data.get("RoomID")
+        email = data.get("email")
+        topics = data.get("research_topics")  # expecting a list
+
+        if not all([room_id, email, topics]):
+            return error_response("RoomID, email, and research_topics are required", 400)
+
+        try:
+            # Directly update nested map under extracted_keywords[email].research_topics
+            update_response = update_room_item(
+                room_id=room_id,
+                update_expression="SET extracted_keywords.#email.#topics = :topics",
+                expression_attr_values={
+                    ":topics": topics
+                },
+                expression_attr_names={
+                    "#email": email,
+                    "#topics": "research_topics"
+                }
+            )
+
+            return success_response({
+                "message": f"Updated research topics for {email}",
+                "updated": update_response.get("Attributes")
+            })
+
+        except Exception as e:
+            import traceback
+            print("Exception during updating research topics:", traceback.format_exc())
             return error_response(str(e), 500)

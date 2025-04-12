@@ -12,6 +12,7 @@ const useRoomPage = () => {
   const [extracting, setExtracting] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [inputMethod, setInputMethod] = useState('description');
+  const [addProfileText, setAddProfileText] = useState('Add Profile');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -59,7 +60,6 @@ const useRoomPage = () => {
   const removeProfile = useCallback(async ({ roomID, email, senderEmail }) => {
     try {
       const result = await roomService.removeProfileFromRoom({ roomID, email, senderEmail });
-      toast.success('Profile removed successfully.');
       return result;
     } catch (err) {
       console.error(err);
@@ -71,11 +71,10 @@ const useRoomPage = () => {
   const addProfile = useCallback(async ({ roomID, name, email, description }) => {
     try {
       const result = await roomService.addProfileToRoom({ roomID, name, email, description });
-      toast.success('Profile added successfully.');
       return result;
     } catch (err) {
       console.error(err);
-      toast.error('Failed to add profile.');
+      toast.error(`${err.message}`);
       throw err;
     }
   }, []);
@@ -121,7 +120,6 @@ const useRoomPage = () => {
         toast.error('No research keywords extracted.');
       }
     } catch (err) {
-      toast.error('Failed to extract research interests.');
     } finally {
       setExtracting(false);
     }
@@ -216,6 +214,7 @@ const useRoomPage = () => {
     loading,
     extracting,
     showModal,
+    addProfileText,
     setShowModal,
     inputMethod,
     setInputMethod,
@@ -223,6 +222,7 @@ const useRoomPage = () => {
     setFormData,
     handleAddProfile,
     handleDeleteProfile,
+    setAddProfileText,
     handleInputChange,
     handleExtractResearch,
     fetchTeams,

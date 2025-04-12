@@ -1,6 +1,7 @@
 import React from 'react';
 
 const AddProfileModal = ({
+  addProfileText,
   formData,
   inputMethod,
   setInputMethod,
@@ -12,7 +13,7 @@ const AddProfileModal = ({
     <div className="modal-overlay">
       <div className="modal-content">
         <div className="modal-header">
-          <h2>Add Researcher Profile</h2>
+          <h2>{addProfileText}</h2>
           <button className="close-button" onClick={() => setShowModal(false)}>&times;</button>
         </div>
 
@@ -116,7 +117,7 @@ const AddProfileModal = ({
               Cancel
             </button>
             <button type="submit" className="primary-button">
-              Add Profile
+              {addProfileText}
             </button>
           </div>
         </form>
