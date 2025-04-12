@@ -1,20 +1,33 @@
-import React from 'react';
+import React, { useState } from 'react';
+import TrashIcon from '../../assets/icons/TrashIcon';
 
-const RoomList = ({ rooms, handleDeleteRoom }) => {
+const RoomList = ({ rooms, title = 'Your Recent Rooms', handleDeleteRoom }) => {
+  const [showAll, setShowAll] = useState(false);
+
   if (!rooms.length) return null;
+
+  const displayedRooms = showAll ? rooms : rooms.slice(0, 4);
 
   return (
     <div className="room-list-section">
       <div className="section-header">
-        <h2>Your Recent Rooms</h2>
+        <h2>{title}</h2>
         {rooms.length > 3 && (
-          <button className="text-button">View all</button>
+          <button
+            className="text-button"
+            onClick={() => setShowAll(!showAll)}
+          >
+            {showAll ? 'Show Less' : 'View All'}
+          </button>
         )}
       </div>
       <div className="room-grid">
-        {rooms.map((room) => (
+        {displayedRooms.map((room) => (
           <div key={room.RoomID} className="room-card">
-            <div className="card-content" onClick={() => window.location.href = `/room/${room.RoomID}`}>
+            <div
+              className="card-content"
+              onClick={() => window.location.href = `/room/${room.RoomID}`}
+            >
               <h3>{room.name || `Room ${room.RoomID.slice(0, 6)}`}</h3>
               <div className="room-stats">
                 <span className="stat">
@@ -25,9 +38,15 @@ const RoomList = ({ rooms, handleDeleteRoom }) => {
                 </span>
               </div>
             </div>
-            <div className="delete-room" onClick={() => handleDeleteRoom(room.RoomID)}>
-              <span role="img" aria-label="Delete" className="emoji-icon">🗑️</span>
-            </div>
+            {handleDeleteRoom && (
+              <button
+                className="delete-btn"
+                title="Delete Profile"
+                onClick={() => handleDeleteRoom(room.RoomID)}
+              >
+                <TrashIcon />
+              </button>
+            )}
           </div>
         ))}
       </div>

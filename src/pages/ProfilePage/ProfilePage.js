@@ -6,17 +6,40 @@ import PageHeader from '../../components/PageHeader';
 
 const ProfilePage = () => {
   const {
-    profiles,
+    loading,
+    room,
+    userEmail,
     navigate,
     isCreatingTeams,
-    handleGenerateTeams
+    handleGenerateTeams,
+    updateResearchTopicsForUser
   } = useProfilePage();
+
+  const profiles = room?.extracted_keywords || {};
+
+  if (loading) {
+    return (
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading room data...</p>
+      </div>
+    );
+  }
+
+  if (!room) {
+    return (
+      <div className="error-container">
+        <h2>Room not found</h2>
+        <p>The room you're looking for doesn't exist or may have been deleted.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="room-page">
       <PageHeader
         title="Research Profiles"
-        subtitle={`${profiles.length} ${profiles.length === 1 ? 'profile' : 'profiles'} extracted`}
+        subtitle={`Created by: ${room?.creatorID}`}
         actions={
           <button onClick={() => navigate('/')} className="secondary-button">
             ← Back to Home
@@ -37,9 +60,13 @@ const ProfilePage = () => {
         ) : (
           <>
             <div className="profile-grid">
-              {profiles.map((profile, idx) => (
-                <ProfileCard key={idx} profile={profile} />
-              ))}
+            {Object.values(profiles).map((profile, idx) => (
+              <ProfileCard 
+              key={idx} 
+              profile={profile} 
+              isCreator={userEmail === room.creatorID || profile.email === userEmail}
+              onSaveTopics={updateResearchTopicsForUser} />
+            ))}
             </div>
 
             <div className="generate-teams-container">

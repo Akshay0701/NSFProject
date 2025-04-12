@@ -1,0 +1,28 @@
+.not-found-page {
+    text-align: center;
+    padding: 80px 20px;
+  }
+  
+  .not-found-page h1 {
+    font-size: 5rem;
+    color: #444;
+  }
+  
+  .not-found-page p {
+    font-size: 1.25rem;
+    margin-top: 10px;
+    color: #777;
+  }
+  
+  .back-home {
+    display: inline-block;
+    margin-top: 20px;
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+  }
+  
+  .back-home:hover {
+    text-decoration: underline;
+  }
+  
