@@ -8,8 +8,8 @@ import RoomList from '../../components/RoomList';
 
 const IntroPage = () => {
   const {
-    roomID, roomIDCreate, setRoomID, setRoomIDCreate, suggestedRoomIDs, error, setError,
-    isLoading, userRooms, addedRooms,
+    roomID, setRoomID, error, setError,
+    isLoading, userRooms,
     handleJoinRoom, handleCreateRoom, handleDeleteRoom
   } = useIntroPage();
 
@@ -18,13 +18,7 @@ const IntroPage = () => {
       <div className="container">
         <HeroSection />
         <div className="intro-actions">
-          <CreateRoomCard
-            roomIDCreate={roomIDCreate}
-            setRoomIDCreate={setRoomIDCreate}
-            onCreateRoom={handleCreateRoom}
-            isLoading={isLoading}
-            suggestedRoomIDs={suggestedRoomIDs}
-          />
+          <CreateRoomCard onCreateRoom={handleCreateRoom} isLoading={isLoading} />
           <JoinRoomCard
             roomID={roomID}
             setRoomID={setRoomID}
@@ -41,18 +35,6 @@ const IntroPage = () => {
           </div>
         ) : (
           <RoomList rooms={userRooms} handleDeleteRoom={handleDeleteRoom} />
-        )}
-
-        {isLoading ? (
-          <div className="loading-rooms">
-            <div className="spinner"></div>
-            <p>Loading your rooms...</p>
-          </div>
-        ) : (
-          <RoomList
-            rooms={addedRooms}
-            title="Rooms You've Joined" 
-          />
         )}
       </div>
     </div>

@@ -73,7 +73,7 @@ class NSFProjectChain:
         {team_info}
         
         ### INSTRUCTION:
-        Generate 5 detailed project abstract recommendations for an research project proposal based on the team's profiles and research interests.
+        Generate 5 detailed project abstract recommendations for an NSF project proposal based on the team's profiles and research interests.
         Each project abstract should be at least 3 sentences long, outlining the project scope, objectives, and potential impact.
         
         Return the output in valid JSON format with a single key "project_proposals" mapping to a list of 5 abstract strings.

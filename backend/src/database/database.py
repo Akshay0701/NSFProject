@@ -15,7 +15,7 @@ dynamodb = boto3.resource(
 
 # Get the Room database table
 room_table = dynamodb.Table('Roomdatabase')
-room_members = dynamodb.Table('RoomMembers')
+
 
 def get_room_by_id(room_id):
     return room_table.get_item(Key={"RoomID": room_id})
@@ -43,29 +43,4 @@ def scan_rooms_by_creator(creator_email):
         FilterExpression='creatorID = :emailVal',
         ExpressionAttributeValues={':emailVal': creator_email}
     )
-
-def add_room_to_creator(creator_email, room_id):
-    # Fetch existing entry
-    response = room_members.get_item(Key={"email": creator_email})
-    existing_rooms = response.get("Item", {}).get("rooms", [])
-
-    # Avoid duplicates
-    if room_id in existing_rooms:
-        return
-
-    updated_rooms = existing_rooms + [room_id]
-
-    # Update the record
-    return room_members.update_item(
-        Key={"email": creator_email},
-        UpdateExpression="SET #rooms = :updatedRooms",
-        ExpressionAttributeNames={"#rooms": "rooms"},
-        ExpressionAttributeValues={":updatedRooms": updated_rooms},
-        ReturnValues="UPDATED_NEW"
-    )
-        
-def get_rooms_by_member_email(email):
-    response = room_members.get_item(Key={"email": email})
-    return response.get("Item", {}).get("rooms", [])
-
 

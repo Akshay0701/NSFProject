@@ -11,30 +11,16 @@ const RoomPage = () => {
     loading,
     showModal,
     setShowModal,
-    setFormData,
-    addProfileText,
     inputMethod,
     setInputMethod,
     formData,
     handleInputChange,
     handleAddProfile,
-    setAddProfileText,
     handleExtractResearch,
     extracting,
     handleDeleteProfile,
     userEmail,
   } = useRoomPage();
-
-  const handleAddProfileShow = () => {
-    setAddProfileText('Add Profile')
-    setFormData({
-      name: '',
-      email: '',
-      description: '',
-      pdfFile: null,
-    });
-    setShowModal(true);
-  };
 
   const profiles = room?.profiles || {};
 
@@ -61,10 +47,9 @@ const RoomPage = () => {
       <PageHeader
         title={`Room: ${room.RoomID}`}
         subtitle={`Created by: ${room.creatorID}`}
-        showCopyButton={true}
         actions={
           <>
-            <button className="primary-button" onClick={() => handleAddProfileShow()}>
+            <button className="primary-button" onClick={() => setShowModal(true)}>
               + Add Profile
             </button>
             <button
@@ -77,19 +62,15 @@ const RoomPage = () => {
         }
       />
 
-
       <div className="content-container">
         {Object.keys(profiles).length > 0 ? (
           <>
             <div className="profile-grid">
               {Object.values(profiles).map((profile, idx) => (
                 <RoomProfileCard
-                  setAddProfileText = {setAddProfileText}
-                  setFormData={setFormData}
-                  setShowModal={setShowModal}
                   key={idx}
                   profile={profile}
-                  isCreator={room.creatorID === userEmail || profile.email === userEmail}
+                  isCreator={room.creatorID === userEmail}
                   onDelete={handleDeleteProfile}
                 />
               ))}
@@ -110,7 +91,7 @@ const RoomPage = () => {
             <div className="empty-icon">📂</div>
             <h3>No profiles yet</h3>
             <p>Add the first profile to get started</p>
-            <button className="primary-button" onClick={() => handleAddProfileShow()}>
+            <button className="primary-button" onClick={() => setShowModal(true)}>
               Add Profile
             </button>
           </div>
@@ -119,7 +100,6 @@ const RoomPage = () => {
 
       {showModal && (
         <AddProfileModal
-          addProfileText = {addProfileText}
           formData={formData}
           inputMethod={inputMethod}
           setInputMethod={setInputMethod}

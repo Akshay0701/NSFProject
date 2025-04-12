@@ -45,26 +45,6 @@ const extractResearchKeywords = async (roomID) => {
   return response.json();  // { extracted_keywords: [...] }
 };
 
-const updateResearchTopicsForUser = async (roomID, email, researchTopics) => {
-  const response = await fetch(`${BASE_URL}/update-keywords`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      RoomID: roomID,
-      email: email,
-      research_topics: researchTopics,
-    }),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to update research topics');
-  }
-
-  return await response.json(); // { message: "...", updated: { ... } }
-};
-
-
 const extractTextFromPDF = async (pdfFile) => {
   const formData = new FormData();
   formData.append('pdf', pdfFile);
@@ -103,5 +83,4 @@ export default {
   generateProposalsForRoom,
   getExtractedKeywords,
   extractTextFromLink,
-  updateResearchTopicsForUser
 };

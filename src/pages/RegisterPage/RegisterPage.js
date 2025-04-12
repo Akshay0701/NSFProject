@@ -110,7 +110,9 @@ const RegisterPage = () => {
 
             <button className="login-button" type="submit" disabled={loading}>
               {loading ? (
-                "Creating account..."
+                <span className="loading-indicator">
+                  <span className="loading-spinner" /> Creating account...
+                </span>
               ) : (
                 'Register'
               )}

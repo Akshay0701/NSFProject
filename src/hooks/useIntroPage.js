@@ -7,35 +7,20 @@ import roomService from '../services/roomService';
 const useIntroPage = () => {
   const navigate = useNavigate();
   const [roomID, setRoomID] = useState('');
-  const [roomIDCreate, setRoomIDCreate] = useState('');
   const [error, setError] = useState('');
   const [userRooms, setUserRooms] = useState([]);
-  const [addedRooms, setAddedRooms] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [suggestedRoomIDs, setSuggestedRoomIDs] = useState([]);
 
   const userEmail = localStorage.getItem('userEmail');
 
-  const createRoom = useCallback(async (creatorID, roomID = null) => {
+  const createRoom = useCallback(async (creatorID) => {
     try {
-      const result = await roomService.createRoom(creatorID, roomID);
+      const result = await roomService.createRoom(creatorID);
       toast.success('Room created successfully.');
-      setSuggestedRoomIDs([]);  // Clear suggestions if successful
-      return result;
+      return result; // { message, RoomID }
     } catch (err) {
       console.error(err);
-  
-      if (roomID) {
-        const suggestions = Array.from({ length: 3 }, (_, i) => {
-          const suffix = Math.floor(Math.random() * 10000);
-          return `${roomID}-${suffix}`;
-        });
-        setSuggestedRoomIDs(suggestions);
-        toast.error(`${err.message}`);
-      } else {
-        toast.error(`${err.message}`);
-      }
-  
+      toast.error('Failed to create room.');
       throw err;
     }
   }, []);
@@ -47,17 +32,6 @@ const useIntroPage = () => {
     } catch (err) {
       console.error(err);
       toast.error('Failed to fetch rooms by email.');
-      return [];
-    }
-  }, []);
-
-  const getAddedRoomsByEmail = useCallback(async (email) => {
-    try {
-      const data = await roomService.getAddedRoomsByEmail(email);
-      return data.rooms || [];
-    } catch (err) {
-      console.error(err);
-      toast.error(`${err.message}`);
       return [];
     }
   }, []);
@@ -82,18 +56,14 @@ const useIntroPage = () => {
 
     setIsLoading(true);
     try {
-      const [createdRooms, joinedRooms] = await Promise.all([
-        getRoomsByEmail(userEmail),
-        getAddedRoomsByEmail(userEmail),
-      ]);
-      setUserRooms(createdRooms);
-      setAddedRooms(joinedRooms);
+      const rooms = await getRoomsByEmail(userEmail);
+      setUserRooms(rooms);
     } catch {
       toast.error('Could not fetch rooms');
     } finally {
       setIsLoading(false);
     }
-  }, [userEmail, getRoomsByEmail, getAddedRoomsByEmail]);
+  }, [userEmail, getRoomsByEmail]);
 
   const handleJoinRoom = () => {
     const trimmedID = roomID.trim();
@@ -110,21 +80,14 @@ const useIntroPage = () => {
       toast.error('Please log in to create a room');
       return;
     }
-  
+
     setIsLoading(true);
     try {
-      const trimmedID = roomIDCreate.trim();
-      let res = null; 
-  
-      if (!trimmedID) {
-        res = await createRoom(userEmail);
-      } else {
-        res = await createRoom(userEmail, trimmedID);
-      }
-  
+      const res = await createRoom(userEmail);
       const newRoomId = res.RoomID;
       navigate(`/room/${newRoomId}`);
     } catch {
+      toast.error('Failed to create room. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -146,12 +109,7 @@ const useIntroPage = () => {
 
   return {
     roomID,
-    roomIDCreate,
-    suggestedRoomIDs,
-    addedRooms,
     setRoomID,
-    setRoomIDCreate,
-    setSuggestedRoomIDs,
     error,
     setError,
     isLoading,

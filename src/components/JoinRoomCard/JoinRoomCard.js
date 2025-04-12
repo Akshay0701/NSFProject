@@ -1,5 +1,4 @@
 import React from 'react';
-import './JoinRoomCard.css'
 
 const JoinRoomCard = ({ roomID, setRoomID, error, setError, handleJoinRoom, isLoading }) => (
   <div className="action-card join-room">

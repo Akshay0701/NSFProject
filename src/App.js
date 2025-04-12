@@ -9,8 +9,6 @@ import IntroPage from './pages/IntroPage/IntroPage';
 import RoomPage from './pages/RoomPage/RoomPage';
 import ProtectedRoute from './ProtectedRoutes';
 import { isAuthenticated } from './utils/auth';
-import { ToastContainer } from 'react-toastify';
-import NotFoundPage from './pages/NotFoundPage';
 
 function App() {
   return (
@@ -34,11 +32,7 @@ function App() {
         <Route path="/room/:roomId/profiles" element={<ProtectedRoute element={<ProfilesPage />} />} />
         <Route path="/room/:roomId/teams" element={<ProtectedRoute element={<TeamPage />} />} />
         <Route path="/room/:roomId/teamswithproposal" element={<ProtectedRoute element={<TeamsWithProposalPage />} />} />
-
-        {/* 404 Route */}
-        <Route path="*" element={<NotFoundPage />} />
       </Routes>
-      <ToastContainer position="top-right" autoClose={4000} />
     </Router>
   );
 }

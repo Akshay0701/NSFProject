@@ -4,7 +4,7 @@ from src.services.proposal_service import NSFProjectChain
 from src.services.research_service import ResearchService
 from src.services.team_service import TeamService
 
-compute_bp = Blueprint('/nsf/compute', __name__, url_prefix="/nsf/room")
+compute_bp = Blueprint('nsf/compute', __name__, url_prefix="/nsf/room")
 
 @compute_bp.route('/extract-pdf-text', methods=['POST'])
 def extract_pdf_text_route():
@@ -22,11 +22,6 @@ def extract_link_text_route():
 def extract_keywords():
     data = request.get_json()
     return ResearchService.extract_research_from_room(data)
-
-@compute_bp.route('/update-keywords', methods=['POST'])
-def update_keywords():
-    data = request.get_json()
-    return ResearchService.update_research_topics_for_user(data)
 
 @compute_bp.route('/get-extracted-keywords', methods=['POST'])
 def get_extract_keywords():

@@ -9,16 +9,15 @@ const useProfilePage = () => {
   const { roomId } = useParams();
   const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(true);
-  const [room, setRoom] = useState(null);
-  const [isCreatingTeams, setIsCreatingTeams] = useState(false);
+  const [profiles, setProfiles] = useState([]);
 
-  const userEmail = localStorage.getItem('userEmail');
+  const [isCreatingTeams, setIsCreatingTeams] = useState(false);
 
   const createTeams = async (roomID) => {
     setIsCreatingTeams(true);
     try {
       const data = await roomService.createTeamsFromRoom(roomID);
+      toast.success('Teams created successfully!');
       navigate(`/room/${roomID}/teams`);
       return data;
     } catch (err) {
@@ -29,36 +28,26 @@ const useProfilePage = () => {
     }
   };
 
-  const updateResearchTopicsForUser = useCallback(async (email, updatedKeywordsList) => {
+  const fetchExtractedKeywords = useCallback(async (roomID) => {
     try {
-      const response = await computingService.updateResearchTopicsForUser(roomId, email, updatedKeywordsList);
-      loadRoom();
-      return response;
-    } catch (err) {
-      toast.error(err.message || 'Update failed');
-      return null;
-    }
-  }, []); 
-
-  const fetchRoomData = useCallback(async (roomId) => {
-    try {
-      const data = await roomService.getRoomData(roomId);
-      console.log('data at useRoom page:', data);
-      return data;
-    } catch (err) {
-      console.error(err);
-      toast.error('Failed to load room data.');
-      return null;
+      const data = await computingService.getExtractedKeywords(roomID);
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching extracted keywords:', error);
+      toast.error('Failed to fetch extracted keywords.');
+      return [];
     }
   }, []);
 
-
-  const loadRoom = useCallback(async () => {
-    setLoading(true);
-    const data = await fetchRoomData(roomId);
-    setRoom(data);
-    setLoading(false);
-  }, [fetchRoomData, roomId]);
+  const loadProfiles = useCallback(async () => {
+    if (!roomId) return;
+    try {
+      const keywords = await fetchExtractedKeywords(roomId);
+      setProfiles(keywords || []);
+    } catch (error) {
+      toast.error("Failed to load research profiles.");
+    }
+  }, [roomId, fetchExtractedKeywords]);
 
   const handleGenerateTeams = useCallback(async () => {
     if (!roomId) return;
@@ -66,18 +55,15 @@ const useProfilePage = () => {
   }, [roomId, createTeams]);
 
   useEffect(() => {
-    loadRoom();
-  }, [loadRoom]);
+    loadProfiles();
+  }, [loadProfiles]);
 
   return {
-    loading,
-    room,
+    profiles,
     roomId,
-    userEmail,
     navigate,
     isCreatingTeams,
     handleGenerateTeams,
-    updateResearchTopicsForUser
   };
 };
 

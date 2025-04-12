@@ -55,31 +55,3 @@ def login_user(data):
 
     except Exception as e:
         return error_response(str(e), 500)
-    
-def refresh_login(data):
-    refresh_token = data.get("refresh_token")
-    email = data.get("email")
-
-    if not refresh_token or not email:
-        return error_response("Refresh token and email are required", 400)
-
-    try:
-        response = cognito_client.initiate_auth(
-            ClientId=CLIENT_ID,
-            AuthFlow="REFRESH_TOKEN_AUTH",
-            AuthParameters={
-                "REFRESH_TOKEN": refresh_token,
-                "SECRET_HASH": get_secret_hash(email, CLIENT_ID, CLIENT_SECRET)
-            },
-        )
-
-        return success_response({
-            "message": "Token refreshed successfully",
-            "tokens": response["AuthenticationResult"]
-        }, 200)
-
-    except cognito_client.exceptions.NotAuthorizedException:
-        return error_response("Invalid refresh token", 401)
-
-    except Exception as e:
-        return error_response(f"Failed to refresh token: {str(e)}", 500)
