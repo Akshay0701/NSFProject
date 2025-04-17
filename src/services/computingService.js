@@ -97,11 +97,47 @@ const extractTextFromLink = async (link) => {
   return response.json();  // { url: [...], text : "" }
 };
 
+const compareFundedProjects = async (roomID) => {
+  const response = await fetch(`${BASE_URL}/compare-similarity`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ RoomID: roomID }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to compare projects');
+  }
+
+  return response.json(); 
+};
+
+
+const extractNSFSolicitationKeywords = async (roomID, description) => {
+  const response = await fetch(`${BASE_URL}/extract-keywords-nsf-solicitation`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      RoomID: roomID,
+      description: description,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to extract NSF solicitation keywords');
+  }
+
+  return response.json(); // 
+};
+
 export default {
   extractTextFromPDF,
+  extractNSFSolicitationKeywords,
   extractResearchKeywords,
   generateProposalsForRoom,
   getExtractedKeywords,
   extractTextFromLink,
-  updateResearchTopicsForUser
+  updateResearchTopicsForUser,
+  compareFundedProjects
 };

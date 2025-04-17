@@ -273,3 +273,27 @@
     padding: 0.4rem 0.8rem;
   }
 }
+
+.similarity-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: white;
+  font-weight: bold;
+  padding: 1px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+}
+
+.circle-text {
+  line-height: 1;
+}
+
+.proposal-team-project-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Push circle to right */
+}

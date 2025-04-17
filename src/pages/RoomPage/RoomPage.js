@@ -4,6 +4,7 @@ import PageHeader from '../../components/PageHeader';
 import RoomProfileCard from '../../components/RoomProfileCard';
 import AddProfileModal from '../../components/AddProfileModal';
 import './RoomPage.css';
+import NSFSolicitationUploadCard from '../../components/NSFSolicitationUploadCard';
 
 const RoomPage = () => {
   const {
@@ -64,23 +65,30 @@ const RoomPage = () => {
         showCopyButton={true}
         actions={
           <>
-            <button className="primary-button" onClick={() => handleAddProfileShow()}>
-              + Add Profile
-            </button>
-            <button
-              className="secondary-button"
-              onClick={() => window.location.href = `/room/${room.RoomID}/teamswithproposal`}
-            >
-              View Proposals
-            </button>
-          </>
+          <button className="primary-button" onClick={() => handleAddProfileShow()}>
+            + Add Profile
+          </button>
+          <button
+            className="secondary-button"
+            onClick={() => window.location.href = `/room/${room.RoomID}/teamswithproposal`}
+          >
+            View Proposals
+          </button>
+          <button
+            className="secondary-button"
+            onClick={() => window.location.href = `/room/${room.RoomID}/previously-funded-projects`}
+          >
+            Previously Funded Projects
+          </button>
+        </>
         }
       />
-
 
       <div className="content-container">
         {Object.keys(profiles).length > 0 ? (
           <>
+              <NSFSolicitationUploadCard/>
+
             <div className="profile-grid">
               {Object.values(profiles).map((profile, idx) => (
                 <RoomProfileCard

@@ -1,4 +1,6 @@
 import React from 'react';
+import logo from '../../assets/applogo.png'; // Adjust the path as needed
+import './HeroSection.css'
 
 const HeroSection = () => (
   <div className="intro-hero">
@@ -9,9 +11,10 @@ const HeroSection = () => (
       </p>
     </div>
     <div className="hero-image">
-      <span role="img" aria-label="Research collaboration" className="emoji-icon">👥</span>
+      <img src={logo} alt="ResearchConnect Logo" className="app-logo" />
     </div>
   </div>
 );
+
 
 export default HeroSection;

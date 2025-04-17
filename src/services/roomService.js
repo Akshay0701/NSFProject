@@ -136,8 +136,65 @@ const getAddedRoomsByEmail = async (email) => {
   return response.json(); // Expected to be { rooms: [...] }
 };
 
+const saveFundedProjects = async (roomID, projectAbstracts) => {
+  const response = await fetch(`${BASE_URL}/save-funded-projects`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      RoomID: roomID,
+      projects: projectAbstracts, // should be an array of abstract strings
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to save funded projects');
+  }
+
+  return await response.json(); // { message: "...", funded_projects: { ... } }
+};
+
+
+const getFundedProjects = async (roomID) => {
+  const response = await fetch(`${BASE_URL}/get-funded-projects`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      RoomID: roomID,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to fetch funded projects');
+  }
+
+  return await response.json(); // { room_id, projects: { project_1: "...", project_2: "..." } }
+};
+
+const updateKeywordsForNSFSolicitaion = async (roomID, keywords) => {
+  const response = await fetch(`${BASE_URL}/update-keywords-nsf-solicitation`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      RoomID: roomID,
+      keywords: keywords
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to update keywords for NSF');
+  }
+
+  return await response.json(); // { room_id, projects: { project_1: "...", project_2: "..." } }
+};
+
 export default {
   getRoomData,
+  saveFundedProjects,
+  getFundedProjects,
+  updateKeywordsForNSFSolicitaion,
   getTeamsByRoom,
   getAddedRoomsByEmail,
   addProfileToRoom,

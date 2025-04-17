@@ -10,6 +10,8 @@ const TeamsWithProposalPage = () => {
     teamsWithProposals,
     isLoading,
     navigate,
+    comparing,
+    handleCompareFundedProjects
   } = useTeamsWithProposals();
 
   const headerActions = (
@@ -23,7 +25,17 @@ const TeamsWithProposalPage = () => {
       <PageHeader
        title="Research Teams with Proposals"
        subtitle={`${teamsWithProposals.length} ${teamsWithProposals.length === 1 ? 'team' : 'teams'} with proposals`}
-       actions={headerActions}
+       actions={
+        <>
+        <button className="primary-button" onClick={() => handleCompareFundedProjects()}>
+          {comparing ? 'Comparing...' : 'Compare with Funded Projects'}
+        </button>
+        <button onClick={() => navigate('/')} className="secondary-button">
+          ← Back to Home
+        </button>
+      </>
+
+       }
       />
 
       <div className="content-container">

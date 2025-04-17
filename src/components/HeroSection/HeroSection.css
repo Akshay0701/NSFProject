@@ -309,3 +309,9 @@
   .hero-image .emoji-icon {
     font-size: 4rem;
   }
+
+  .app-logo {
+    width: 200px;
+    height: auto;
+  }
+  

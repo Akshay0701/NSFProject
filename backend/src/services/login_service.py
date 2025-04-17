@@ -83,3 +83,100 @@ def refresh_login(data):
 
     except Exception as e:
         return error_response(f"Failed to refresh token: {str(e)}", 500)
+
+
+def initiate_forgot_password(data):
+    """
+    Initiates the forgot password flow for a user.
+    Sends a confirmation code via the configured method (e.g., email).
+    """
+    email = data.get("email")
+
+    if not email:
+        return error_response("Email is required", 400)
+
+    try:
+        # Calculate SecretHash (required if your app client has a secret)
+        secret_hash = get_secret_hash(email, CLIENT_ID, CLIENT_SECRET)
+
+        response = cognito_client.forgot_password(
+            ClientId=CLIENT_ID,
+            SecretHash=secret_hash,
+            Username=email
+        )
+
+        return success_response({
+            "message": "Password reset code sent successfully. Check your delivery method (e.g., email)."
+        }, 200)
+
+    except cognito_client.exceptions.UserNotFoundException:
+        return error_response("User does not exist", 404)
+
+    except cognito_client.exceptions.InvalidParameterException as e:
+        return error_response(f"Invalid parameter: {str(e)}", 400)
+
+    except cognito_client.exceptions.LimitExceededException:
+        return error_response("Attempt limit exceeded, please try again later.", 429)
+
+    except cognito_client.exceptions.ResourceNotFoundException:
+         return error_response("Cognito client configuration error.", 500)
+
+    except Exception as e:
+        print(f"Error initiating forgot password: {e}")
+        return error_response("An error occurred while initiating the password reset.", 500)
+    
+
+def confirm_reset_password(data):
+    """
+    Confirms the forgot password flow using the confirmation code
+    and sets the new password for the user.
+    """
+    email = data.get("email")
+    confirmation_code = data.get("confirmation_code")
+    new_password = data.get("new_password")
+
+    if not email or not confirmation_code or not new_password:
+        return error_response("Email, confirmation code, and new password are required", 400)
+
+    try:
+        # Calculate SecretHash
+        secret_hash = get_secret_hash(email, CLIENT_ID, CLIENT_SECRET)
+
+        response = cognito_client.confirm_forgot_password(
+            ClientId=CLIENT_ID,
+            SecretHash=secret_hash,
+            Username=email,
+            ConfirmationCode=confirmation_code,
+            Password=new_password
+        )
+
+        # Password has been successfully reset.
+        return success_response({
+            "message": "Password has been successfully reset."
+        }, 200)
+
+    except cognito_client.exceptions.UserNotFoundException:
+        return error_response("User does not exist", 404)
+
+    except cognito_client.exceptions.CodeMismatchException:
+        return error_response("Invalid confirmation code", 400)
+
+    except cognito_client.exceptions.ExpiredCodeException:
+        return error_response("Confirmation code has expired", 400)
+
+    except cognito_client.exceptions.InvalidPasswordException as e:
+        return error_response(f"New password does not meet policy requirements: {str(e)}", 400)
+
+    except cognito_client.exceptions.InvalidParameterException as e:
+        return error_response(f"Invalid parameter: {str(e)}", 400)
+
+    except cognito_client.exceptions.LimitExceededException:
+        return error_response("Attempt limit exceeded, please try again later.", 429)
+
+    except cognito_client.exceptions.ResourceNotFoundException:
+         return error_response("Cognito client configuration error.", 500)
+
+    except Exception as e:
+        # Log the exception for debugging
+        print(f"Error confirming forgot password: {e}")
+        return error_response("An error occurred while resetting the password.", 500)

@@ -57,7 +57,7 @@ class ResearchService:
         return valid
 
     @staticmethod
-    def extract_research_interests(text: str) -> List[str]:
+    def extract_research_interests(text: str, noOfKeywords: int) -> List[str]:
         logger.info("Extracting research interests")
         clean_text = " ".join(text.split())
         candidates = ResearchService.extract_candidate_phrases(clean_text)
@@ -68,7 +68,66 @@ class ResearchService:
             return []
 
         phrase_counts = Counter(valid_phrases)
-        return [phrase for phrase, _ in phrase_counts.most_common(10)]
+        unique_phrases = list(phrase_counts.items())
+
+        if noOfKeywords >= len(unique_phrases):
+            return [phrase for phrase, _ in unique_phrases]
+
+        return [phrase for phrase, _ in phrase_counts.most_common(noOfKeywords)]
+
+    
+    @staticmethod
+    def extract_keywords_from_nsf_solitation(data):
+        room_id = data.get("RoomID")
+        description = data.get("description")
+
+        if not description or not room_id:
+            raise InvalidInputError("No description or room id data provided")
+
+        try:
+            topics_map = ResearchService.extract_research_interests(description, 100)
+
+            update_room_item(
+                room_id=room_id,
+                update_expression="SET nsf_solicitation = :keywords",
+                expression_attr_values={":keywords": topics_map}
+            )
+
+            return success_response({
+                "message": "NSF interests extracted successfully",
+                "keywords": topics_map
+            }) 
+        except Exception as e:
+            import traceback
+            print("Exception during interest extraction:", traceback.format_exc())
+            return error_response(str(e), 500)
+        
+
+    @staticmethod
+    def update_keywords_from_nsf_solitation(data):
+        room_id = data.get("RoomID")
+        keywords = data.get("keywords")
+
+        if not keywords or not room_id:
+            raise InvalidInputError("No keywords or room id is provided")
+    
+        try:
+
+            update_room_item(
+                room_id=room_id,
+                update_expression="SET nsf_solicitation = :keywords",
+                expression_attr_values={":keywords": keywords}
+            )
+
+            return success_response({
+                "message": "NSF interests extracted successfully",
+                "keywords": keywords
+            }) 
+    
+        except Exception as e:
+            import traceback
+            print("Exception during interest extraction:", traceback.format_exc())
+            return error_response(str(e), 500)
 
     @staticmethod
     def extract_interests_from_profiles(profiles_data: List[Dict], request_files: Dict) -> Dict[str, Dict]:
@@ -84,7 +143,7 @@ class ResearchService:
                 if not name or not description or not email:
                     continue
 
-                topics_map = ResearchService.extract_research_interests(description)
+                topics_map = ResearchService.extract_research_interests(description, 10)
 
                 results[email] = {
                     "name": name,

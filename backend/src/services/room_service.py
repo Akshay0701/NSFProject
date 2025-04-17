@@ -179,3 +179,64 @@ def get_teams_data(data):
 
     except ClientError as e:
         return error_response(str(e), 500)
+
+def save_funded_projects_data(data):
+    try:
+        room_id = data.get("RoomID")
+        projects = data.get("projects")
+
+        if not room_id or not isinstance(projects, list):
+            return error_response("room_id and projects list are required", 400)
+
+        # Convert the list of projects into a dictionary with abstract as keys
+        funded_map = {}
+        for idx, projAbstract in enumerate(projects):
+            abstract = projAbstract
+            if abstract:
+                key = f"project_{idx+1}"
+                funded_map[key] = abstract
+
+        # Update the room's funded_project field in DynamoDB
+        update_room_item(
+            room_id=room_id,
+            update_expression="SET funded_projects = :data",
+            expression_attr_values={":data": funded_map}
+        )
+
+        return success_response({
+            "message": f"{len(funded_map)} funded projects saved for room {room_id}.",
+            "funded_projects": funded_map
+        })
+
+    except Exception as e:
+        import traceback
+        print("Exception in save_funded_projects:", traceback.format_exc())
+        return error_response("Server error: " + str(e), 500)
+    
+def get_funded_projects_data(data):
+    try:
+        room_id = data.get("RoomID")
+
+        if not room_id:
+            return error_response("room_id is required", 400)
+
+        # Fetch room data
+        result = get_room_by_id(room_id)
+        if "Item" not in result:
+            return error_response("Room not found", 404)
+
+        room_data = result["Item"]
+        funded_projects_map = room_data.get("funded_projects", {})
+
+        return success_response({
+            "room_id": room_id,
+            "projects": funded_projects_map
+        })
+
+    except Exception as e:
+        import traceback
+        print("Exception in get_funded_projects:", traceback.format_exc())
+        return error_response(str(e), 500)
+
+
+    

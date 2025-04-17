@@ -1,4 +1,6 @@
 from flask import Blueprint, request, jsonify
+from src.services.open_ai_proposal_service import NSFProjectOpenAIChain
+from src.services.compare_funded_project_service import CompareSimilarity
 from src.utils.response_utils import error_response
 from src.services.proposal_service import NSFProjectChain
 from src.services.research_service import ResearchService
@@ -23,6 +25,16 @@ def extract_keywords():
     data = request.get_json()
     return ResearchService.extract_research_from_room(data)
 
+@compute_bp.route('/extract-keywords-nsf-solicitation', methods=['POST'])
+def extract_keywords_nsf_solicitation():
+    data = request.get_json()
+    return ResearchService.extract_keywords_from_nsf_solitation(data)
+
+@compute_bp.route('/update-keywords-nsf-solicitation', methods=['POST'])
+def update_keywords_nsf_solicitation():
+    data = request.get_json()
+    return ResearchService.update_keywords_from_nsf_solitation(data)
+
 @compute_bp.route('/update-keywords', methods=['POST'])
 def update_keywords():
     data = request.get_json()
@@ -43,3 +55,8 @@ def generate_proposals_route():
     data = request.get_json()
     nsf_chain = NSFProjectChain()
     return nsf_chain.generate_proposals_for_room(data)
+
+@compute_bp.route('/compare-similarity', methods=['POST'])
+def compare_similarity():
+    data = request.get_json()
+    return CompareSimilarity.compare_similarity_teams_project(data)

@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './LoginPage.css';
 import useLoginPage from '../../hooks/useLoginPage';
+import AboutPage from '../AboutPage/AboutPage'; // import AboutPage
 
 const LoginPage = () => {
   const {
@@ -15,8 +16,25 @@ const LoginPage = () => {
     handleLogin,
   } = useLoginPage();
 
+  const [showAbout, setShowAbout] = useState(false);
+
   return (
     <div className="login-page">
+      <div className="about-login-button">
+        <button onClick={() => setShowAbout(true)} className="about-btn" title="About ResearchConnect">
+          ℹ️ About
+        </button>
+      </div>
+
+      {showAbout && (
+        <div className="modal-overlay">
+          <div className="modal-content wide-modal">
+            <button className="close-button" onClick={() => setShowAbout(false)}>✖</button>
+            <AboutPage />
+          </div>
+        </div>
+      )}
+
       <div className="login-container">
         <div className="login-illustration">
           <div className="illustration-content">

@@ -1,0 +1,276 @@
+/* Import or define root variables if not globally available */
+:root {
+    --primary: #4f46e5;
+    --primary-light: #6366f1;
+    --primary-dark: #4338ca;
+    --text: #1f2937;
+    --text-light: #6b7280;
+    --border: #e5e7eb;
+    --background: #f9fafb;
+    --card-bg: #ffffff;
+    --error: #ef4444;
+    --success: #10b981; /* Added success color */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+  }
+  
+  .previously-funded-page {
+    min-height: 100vh;
+    background-color: var(--background);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text);
+    padding-bottom: 5rem; /* Ensure space for save button */
+  }
+  
+  /* Error Message Bar */
+  .error-message-bar {
+      background-color: var(--error);
+      color: white;
+      padding: 0.75rem 1.5rem;
+      margin: -1rem auto 1.5rem auto; /* Adjust based on PageHeader margin */
+      max-width: 1200px; /* Match content width */
+      border-radius: var(--radius-sm);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow-sm);
+  }
+  
+  .error-message-bar p {
+      margin: 0;
+      font-weight: 500;
+  }
+  
+  .error-message-bar button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      line-height: 1;
+      cursor: pointer;
+      opacity: 0.8;
+      padding: 0 0.5rem;
+  }
+  .error-message-bar button:hover {
+      opacity: 1;
+  }
+  
+  
+  /* Content Container */
+  .content-container-funded {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+  
+  /* Table Styles */
+  .table-container {
+    background: var(--card-bg);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    overflow-x: auto; /* Allows horizontal scroll on small screens */
+    margin-bottom: 1.5rem;
+  }
+  
+  .projects-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+  
+  .projects-table th,
+  .projects-table td {
+    padding: 1rem 1.25rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top; /* Align content to top */
+  }
+  
+  .projects-table th {
+    background-color: #f9fafb; /* Slightly different header bg */
+    font-weight: 600;
+    color: var(--text-light);
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+  }
+  
+  .projects-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .projects-table tbody tr:hover {
+    background-color: #f9fafb;
+  }
+  
+  /* Column Widths (adjust as needed) */
+  .col-number {
+    width: 5%;
+    text-align: right;
+    color: var(--text-light);
+  }
+  
+  .col-abstract {
+    width: 75%;
+  }
+  
+  .col-actions {
+    width: 15%;
+    text-align: center;
+  }
+  
+  /* Abstract Cell Styling */
+  .abstract-cell p {
+    margin: 0;
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* Show 3 lines */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text);
+  }
+  
+  .abstract-cell p i { /* Style for 'No abstract' text */
+      color: var(--text-light);
+  }
+  
+  .edit-textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 80px; /* Adjust min-height */
+    box-sizing: border-box; /* Include padding/border in width */
+  }
+  
+  .edit-textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1);
+  }
+  
+  /* Action Cell Buttons */
+  .action-cell {
+    white-space: nowrap; /* Prevent buttons from wrapping */
+    vertical-align: middle; /* Center buttons vertically */
+  }
+  
+  .action-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem; /* Adjust icon size */
+    margin: 0 0.4rem;
+    padding: 0.2rem;
+    border-radius: var(--radius-sm);
+    transition: color 0.2s ease, background-color 0.2s ease;
+  }
+  
+  .action-button:hover {
+    background-color: #f3f4f6; /* Light background on hover */
+  }
+  
+  .edit-button { color: var(--primary); }
+  .edit-button:hover { color: var(--primary-dark); }
+  
+  .delete-button { color: var(--error); }
+  .delete-button:hover { color: #c0392b; /* Darker red */}
+  
+  .save-button { color: var(--success); }
+  .save-button:hover { color: #059669; /* Darker green */}
+  
+  .cancel-button { color: var(--text-light); }
+  .cancel-button:hover { color: var(--text); }
+  
+  /* Add Project Button (below table) */
+  .add-project-row-button-container {
+      text-align: center;
+      margin-bottom: 2rem; /* Space before save button */
+  }
+  .add-project-button {
+      /* Using secondary button style */
+  }
+  
+  /* Save All Button Container */
+  .save-all-container {
+    text-align: center;
+    margin-top: 2rem;
+    padding: 1rem 0;
+    /* border-top: 1px solid var(--border); */ /* Optional separator */
+  }
+  .save-projects-button {
+     /* Using generate button style */
+  }
+  
+  .save-disabled-reason {
+      display: block;
+      color: var(--text-light);
+      font-size: 0.8rem;
+      margin-top: 0.5rem;
+  }
+  
+  /* Empty State */
+  .empty-state-funded {
+    text-align: center;
+    padding: 3rem;
+    background: var(--card-bg);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    max-width: 500px;
+    margin: 2rem auto;
+    color: var(--text);
+  }
+  
+  .empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: var(--text-light);
+  }
+  
+  .empty-state-funded h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .empty-state-funded p {
+    color: var(--text-light);
+    margin-bottom: 1.5rem;
+  }
+  
+  /* Loading Spinner (reused from RoomPage) */
+  .loading-spinner {
+    width: 30px; /* Smaller spinner for inline use */
+    height: 30px;
+    border: 3px solid rgba(79, 70, 229, 0.1);
+    border-radius: 50%;
+    border-top-color: var(--primary);
+    animation: spin 1s linear infinite;
+    margin: 1rem auto; /* Center in empty state */
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .content-container-funded {
+      padding: 0 1rem;
+    }
+  
+    .projects-table th,
+    .projects-table td {
+      padding: 0.75rem;
+    }
+  
+    /* Consider stacking table on very small screens if needed */
+  }

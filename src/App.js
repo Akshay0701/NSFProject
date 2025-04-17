@@ -11,6 +11,9 @@ import ProtectedRoute from './ProtectedRoutes';
 import { isAuthenticated } from './utils/auth';
 import { ToastContainer } from 'react-toastify';
 import NotFoundPage from './pages/NotFoundPage';
+import AboutPage from './pages/AboutPage';
+import ForgotPasswordPage from './pages/ForgetPasswordPage';
+import PreviouslyFundedProjectPage from './pages/PreviouslyFundedProjectPage';
 
 function App() {
   return (
@@ -25,12 +28,16 @@ function App() {
         {/* Public routes */}
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage/>} />
+
+        <Route path="/about" element={<ProtectedRoute element={<AboutPage />} />} />
 
         {/* Protected routes */}
         <Route path="/intro" element={<ProtectedRoute element={<IntroPage />} />} />
-
+        
         {/* Room routes */}
         <Route path="/room/:roomId" element={<ProtectedRoute element={<RoomPage />} />} />
+        <Route path="/room/:roomId/previously-funded-projects" element={<ProtectedRoute element={<PreviouslyFundedProjectPage />} />} />
         <Route path="/room/:roomId/profiles" element={<ProtectedRoute element={<ProfilesPage />} />} />
         <Route path="/room/:roomId/teams" element={<ProtectedRoute element={<TeamPage />} />} />
         <Route path="/room/:roomId/teamswithproposal" element={<ProtectedRoute element={<TeamsWithProposalPage />} />} />

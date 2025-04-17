@@ -45,4 +45,38 @@ const refreshToken = async (email, refreshToken) => {
   return response.json();
 };
 
-export default { login, register, refreshToken };
+const initiateForgotPassword = async (email) => {
+  const response = await fetch(`${BASE_URL}/forgot-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to Initiate password reset');
+  }
+
+  return response.json();
+};
+
+const confirmResetPassword = async (email, confirmationCode, newPassword) => {
+  const response = await fetch(`${BASE_URL}/reset-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email: email,
+      confirmation_code: confirmationCode,
+      new_password: newPassword,         
+    }),
+  });
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to reset password');
+  }
+
+  return response.json();
+};
+
+export default { login, register, refreshToken, initiateForgotPassword, confirmResetPassword };

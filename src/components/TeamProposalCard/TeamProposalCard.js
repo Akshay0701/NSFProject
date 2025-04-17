@@ -1,17 +1,28 @@
-// src/components/TeamProposalCard.js
 import React, { useState } from 'react';
 import './TeamProposalCard.css';
+import SearchIcon from '../../assets/icons/SearchIcon';
+import MemberIcon from '../../assets/icons/MemberIcon';
+import PageIcon from '../../assets/icons/PageIcon';
+
+const getColorFromScore = (score) => {
+  const red = Math.min(255, Math.floor(score * 255));
+  const green = Math.min(255, Math.floor((1 - score) * 255));
+  return `rgb(${red}, ${green}, 80)`;
+};
 
 const TeamProposalCard = ({ team }) => {
   const [showAllProposals, setShowAllProposals] = useState(false);
-  const initialProposalLimit = 2; // Show only 2 proposals initially
+  const initialProposalLimit = 2;
+
   const proposalsToShow = showAllProposals
     ? team.project_proposals
     : team.project_proposals?.slice(0, initialProposalLimit);
 
+  const similarityScores = team.similarity_project_score || [];
+
   return (
     <div className="proposal-team-wrapper">
-      {/* Left Panel - Team Info */}
+      {/* Left Panel */}
       <div className="proposal-team-details">
         <div className="proposal-team-title-bar">
           <h2>Team {team.team_id}</h2>
@@ -21,9 +32,7 @@ const TeamProposalCard = ({ team }) => {
         </div>
 
         <div className="proposal-team-block">
-          <h3 className="proposal-team-heading">
-            <span className="proposal-team-icon">🔍</span> Research Focus
-          </h3>
+          <h3 className="proposal-team-heading"><SearchIcon /> Research Focus</h3>
           <div className="proposal-team-tags">
             {team.team_research_areas.map((area, idx) => (
               <span key={idx} className="proposal-team-research-label">{area}</span>
@@ -32,9 +41,7 @@ const TeamProposalCard = ({ team }) => {
         </div>
 
         <div className="proposal-team-block">
-          <h3 className="proposal-team-heading">
-            <span className="proposal-team-icon">👥</span> Members
-          </h3>
+          <h3 className="proposal-team-heading"><MemberIcon /> Members</h3>
           <div className="proposal-team-members">
             {team.members.map((member) => (
               <div key={member} className="proposal-team-member">
@@ -58,9 +65,7 @@ const TeamProposalCard = ({ team }) => {
       {/* Right Panel - Proposals */}
       <div className="proposal-team-projects">
         <div className="proposal-team-projects-title">
-          <h3>
-            <span className="proposal-team-icon">📑</span> Project Proposals
-          </h3>
+          <h3><PageIcon /> Project Proposals</h3>
           <span className="proposal-team-projects-count">
             {team.project_proposals?.length || 0} proposal{team.project_proposals?.length !== 1 ? 's' : ''}
           </span>
@@ -69,17 +74,34 @@ const TeamProposalCard = ({ team }) => {
         <div className="proposal-team-projects-list">
           {team.project_proposals?.length > 0 ? (
             <>
-              {proposalsToShow.map((proposal, idx) => (
-                <div key={idx} className="proposal-team-project-item">
-                  <div className="proposal-team-project-header">
-                    <h4>Proposal #{idx + 1}</h4>
+              {proposalsToShow.map((proposal, idx) => {
+                const similarity = similarityScores[idx];
+                const score = similarity?.max_similarity_score ?? null;
+                const percentage = score !== null ? Math.round(score * 100) : null;
+                const color = score !== null ? getColorFromScore(score) : '#888';
+
+                return (
+                  <div key={idx} className="proposal-team-project-item">
+                    <div className="proposal-team-project-header">
+                      <h4>Proposal #{idx + 1}</h4>
+                      {percentage !== null && (
+                        <div
+                          className="similarity-circle"
+                          title={`Similarity with funded project: ${percentage}%`}
+                          style={{ backgroundColor: color }}
+                        >
+                          <span className="circle-text">{percentage}%</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="proposal-team-project-body">
+                      <p className="proposal-team-project-text">{proposal}</p>
+                    </div>
                   </div>
-                  <div className="proposal-team-project-body">
-                    <p className="proposal-team-project-text">{proposal}</p>
-                  </div>
-                </div>
-              ))}
-              {team.project_proposals?.length > initialProposalLimit && (
+                
+                );
+              })}
+              {team.project_proposals.length > initialProposalLimit && (
                 <button
                   className="proposal-team-show-more"
                   onClick={() => setShowAllProposals(!showAllProposals)}

@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import useRoomPage from './useRoomPage';
+import computingService from '../services/computingService';
+import { toast } from 'react-toastify';
 
 const useTeamsWithProposals = () => {
   const { roomId } = useParams();
@@ -8,6 +10,7 @@ const useTeamsWithProposals = () => {
   const { fetchTeams, isLoading } = useRoomPage();
 
   const [teamsWithProposals, setTeamsWithProposals] = useState([]);
+  const [comparing, setComparing] = useState(false); 
 
   const loadTeams = useCallback(async () => {
     if (!roomId) return;
@@ -23,11 +26,27 @@ const useTeamsWithProposals = () => {
     loadTeams();
   }, [loadTeams]);
 
+  const handleCompareFundedProjects = useCallback(async () => {
+    if (!roomId) return;
+    setComparing(true);
+    try {
+      await computingService.compareFundedProjects(roomId);
+      await loadTeams(); 
+    } catch (err) {
+      toast.error(err.message);
+      console.error('Error comparing funded projects:', err);
+    } finally {
+      setComparing(false);
+    }
+  }, [roomId, loadTeams]);
+
   return {
     roomId,
     navigate,
     teamsWithProposals,
-    isLoading
+    isLoading,
+    comparing,                
+    handleCompareFundedProjects, 
   };
 };
 

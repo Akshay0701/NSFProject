@@ -45,7 +45,7 @@ const ProfileCard = ({ profile, isCreator = true, onSaveTopics }) => {
 
       {showModal && (
         <EditResearchModal
-          profile={profile}
+          listOfKeywords={profile.research_topics}
           onClose={() => setShowModal(false)}
           onSave={handleSave}
         />

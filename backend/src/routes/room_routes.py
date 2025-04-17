@@ -1,13 +1,15 @@
 from flask import Blueprint, request, jsonify
 from src.services.room_service import (
     create_room,
+    get_funded_projects_data,
     get_room_data,
     add_profile_to_room,
     remove_profile_from_room,
     get_rooms_by_email,
     remove_room,
     get_teams_data,
-    get_added_room_data
+    get_added_room_data,
+    save_funded_projects_data
 )
 
 room_bp = Blueprint('nsf/room', __name__, url_prefix="/nsf/room")
@@ -52,3 +54,12 @@ def get_teams():
     data = request.get_json()
     return get_teams_data(data)
 
+@room_bp.route('/save-funded-projects', methods=['POST'])
+def save_funded_projects():
+    data = request.get_json()
+    return save_funded_projects_data(data)
+
+@room_bp.route('/get-funded-projects', methods=['POST'])
+def get_funded_projects():
+    data = request.get_json()
+    return get_funded_projects_data(data)

@@ -2,8 +2,8 @@
 import React, { useState } from 'react';
 import './EditResearchModal.css';
 
-const EditResearchModal = ({ profile, onClose, onSave }) => {
-  const [topics, setTopics] = useState(profile.research_topics || []);
+const EditResearchModal = ({ listOfKeywords, onClose, onSave }) => {
+  const [topics, setTopics] = useState( listOfKeywords || []);
   const [newTopic, setNewTopic] = useState('');
 
   const handleAddTopic = () => {
@@ -21,8 +21,6 @@ const EditResearchModal = ({ profile, onClose, onSave }) => {
     <div className="modal-overlay">
       <div className="modal">
         <h2>Edit Research Topics</h2>
-        <p><strong>Name:</strong> {profile.name}</p>
-        <p><strong>Email:</strong> {profile.email}</p>
 
         <div className="topic-editor">
           <div className="current-topics">
