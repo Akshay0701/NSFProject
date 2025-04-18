@@ -159,3 +159,47 @@ class NSFProjectChain:
             return error_response(str(e), 500)
         except Exception as e:
             return error_response(str(e), 500)
+        
+    def generate_proposal_for_single_team(self, data):
+        room_id = data.get("RoomID")
+        team_index = data.get("team_index")  # expecting int like 0, 1, 2...
+
+        if room_id is None or team_index is None:
+            return error_response("RoomID and team_index are required", 400)
+
+        try:
+            # Step 1: Load room data
+            response = get_room_by_id(room_id)
+            room_item = response.get("Item")
+
+            if not room_item:
+                return error_response("Room not found", 404)
+
+            teams = room_item.get("teams", [])
+            if not (0 <= team_index < len(teams)):
+                return error_response("Invalid team index", 400)
+
+            # Step 2: Generate proposal for the selected team
+            team = teams[team_index]
+            try:
+                proposals = self.generate_project_proposals(team)
+                teams[team_index]["project_proposals"] = proposals
+            except Exception as e:
+                return error_response(f"Failed to generate proposals for team {team_index}: {str(e)}", 500)
+
+            # Step 3: Update that team in DB
+            update_room_item(
+                room_id=room_id,
+                update_expression="SET teams = :teams",
+                expression_attr_values={":teams": teams}
+            )
+
+            return success_response({
+                "message": f"Proposals generated for team index {team_index}",
+                "team": teams[team_index]
+            }, 200)
+
+        except Exception as e:
+            import traceback
+            print(traceback.format_exc())
+            return error_response(f"Internal server error: {str(e)}", 500)

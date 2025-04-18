@@ -10,7 +10,7 @@ const getColorFromScore = (score) => {
   return `rgb(${red}, ${green}, 80)`;
 };
 
-const TeamProposalCard = ({ team }) => {
+const TeamProposalCard = ({ team, onGenerateProposals, generatingIndex }) => {
   const [showAllProposals, setShowAllProposals] = useState(false);
   const initialProposalLimit = 2;
 
@@ -19,6 +19,9 @@ const TeamProposalCard = ({ team }) => {
     : team.project_proposals?.slice(0, initialProposalLimit);
 
   const similarityScores = team.similarity_project_score || [];
+  const hasProposals = team.project_proposals?.length > 0;
+  const isGenerating = generatingIndex === (team.team_id - 1);
+
 
   return (
     <div className="proposal-team-wrapper">
@@ -66,55 +69,69 @@ const TeamProposalCard = ({ team }) => {
       <div className="proposal-team-projects">
         <div className="proposal-team-projects-title">
           <h3><PageIcon /> Project Proposals</h3>
-          <span className="proposal-team-projects-count">
-            {team.project_proposals?.length || 0} proposal{team.project_proposals?.length !== 1 ? 's' : ''}
-          </span>
+          <div className="proposal-team-projects-meta">
+            <span className="proposal-team-projects-count">
+              {team.project_proposals?.length || 0} proposal{team.project_proposals?.length !== 1 ? 's' : ''}
+            </span>
+            <button
+              className="generate-proposal-btn"
+              disabled={hasProposals || isGenerating}
+              onClick={() => onGenerateProposals(team.team_id - 1)}
+            >
+              {isGenerating ? 'Generating...' : 'Generate Proposals'}
+            </button>
+          </div>
         </div>
 
         <div className="proposal-team-projects-list">
-          {team.project_proposals?.length > 0 ? (
-            <>
-              {proposalsToShow.map((proposal, idx) => {
-                const similarity = similarityScores[idx];
-                const score = similarity?.max_similarity_score ?? null;
-                const percentage = score !== null ? Math.round(score * 100) : null;
-                const color = score !== null ? getColorFromScore(score) : '#888';
+          {isGenerating ? (
+              <div className="proposal-team-loading">
+                <p>Generating proposals...</p>
+                <div className="spinner"></div>
+              </div>
+            ) : hasProposals ? (
+              <>
+                {proposalsToShow.map((proposal, idx) => {
+                  const similarity = similarityScores[idx];
+                  const score = similarity?.max_similarity_score ?? null;
+                  const percentage = score !== null ? Math.round(score * 100) : null;
+                  const color = score !== null ? getColorFromScore(score) : '#888';
 
-                return (
-                  <div key={idx} className="proposal-team-project-item">
-                    <div className="proposal-team-project-header">
-                      <h4>Proposal #{idx + 1}</h4>
-                      {percentage !== null && (
-                        <div
-                          className="similarity-circle"
-                          title={`Similarity with funded project: ${percentage}%`}
-                          style={{ backgroundColor: color }}
-                        >
-                          <span className="circle-text">{percentage}%</span>
-                        </div>
-                      )}
+                  return (
+                    <div key={idx} className="proposal-team-project-item">
+                      <div className="proposal-team-project-header">
+                        <h4>Proposal #{idx + 1}</h4>
+                        {percentage !== null && (
+                          <div
+                            className="similarity-circle"
+                            title={`Similarity with funded project: ${percentage}%`}
+                            style={{ backgroundColor: color }}
+                          >
+                            <span className="circle-text">{percentage}%</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="proposal-team-project-body">
+                        <p className="proposal-team-project-text">{proposal}</p>
+                      </div>
                     </div>
-                    <div className="proposal-team-project-body">
-                      <p className="proposal-team-project-text">{proposal}</p>
-                    </div>
-                  </div>
-                
-                );
-              })}
-              {team.project_proposals.length > initialProposalLimit && (
-                <button
-                  className="proposal-team-show-more"
-                  onClick={() => setShowAllProposals(!showAllProposals)}
-                >
-                  {showAllProposals ? 'Show Less' : `Show More (${team.project_proposals.length - initialProposalLimit} more)`}
-                </button>
-              )}
-            </>
-          ) : (
-            <div className="proposal-team-no-projects">
-              No proposals generated for this team
-            </div>
-          )}
+                  );
+                })}
+                {team.project_proposals.length > initialProposalLimit && (
+                  <button
+                    className="proposal-team-show-more"
+                    onClick={() => setShowAllProposals(!showAllProposals)}
+                  >
+                    {showAllProposals ? 'Show Less' : `Show More (${team.project_proposals.length - initialProposalLimit} more)`}
+                  </button>
+                )}
+              </>
+            ) : (
+              <div className="proposal-team-no-projects">
+                No proposals generated for this team
+              </div>
+            )}
+
         </div>
       </div>
     </div>

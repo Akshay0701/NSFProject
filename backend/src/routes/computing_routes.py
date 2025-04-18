@@ -54,7 +54,7 @@ def create_team():
 def generate_proposals_route():
     data = request.get_json()
     nsf_chain = NSFProjectChain()
-    return nsf_chain.generate_proposals_for_room(data)
+    return nsf_chain.generate_proposal_for_single_team(data)
 
 @compute_bp.route('/compare-similarity', methods=['POST'])
 def compare_similarity():

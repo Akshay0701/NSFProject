@@ -19,7 +19,7 @@ const useProfilePage = () => {
     setIsCreatingTeams(true);
     try {
       const data = await roomService.createTeamsFromRoom(roomID);
-      navigate(`/room/${roomID}/teams`);
+      navigate(`/room/${roomID}/teamswithproposal`);
       return data;
     } catch (err) {
       console.error('Create teams error:', err);

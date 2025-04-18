@@ -11,6 +11,8 @@ const TeamsWithProposalPage = () => {
     isLoading,
     navigate,
     comparing,
+    generatingIndex,
+    handleGenerateProposalForTeam,
     handleCompareFundedProjects
   } = useTeamsWithProposals();
 
@@ -61,7 +63,10 @@ const TeamsWithProposalPage = () => {
         ) : (
           <div className="teams-proposals-list">
             {teamsWithProposals.map((team) => (
-              <TeamProposalCard key={team.team_id} team={team} />
+              <TeamProposalCard key={team.team_id} 
+              team={team} 
+              generatingIndex={generatingIndex}
+              onGenerateProposals={handleGenerateProposalForTeam} />
             ))}
           </div>
         )}

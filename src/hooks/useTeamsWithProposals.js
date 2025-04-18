@@ -11,6 +11,7 @@ const useTeamsWithProposals = () => {
 
   const [teamsWithProposals, setTeamsWithProposals] = useState([]);
   const [comparing, setComparing] = useState(false); 
+  const [generatingIndex, setGeneratingIndex] = useState(null); // to track which team is generating
 
   const loadTeams = useCallback(async () => {
     if (!roomId) return;
@@ -40,13 +41,29 @@ const useTeamsWithProposals = () => {
     }
   }, [roomId, loadTeams]);
 
+  const handleGenerateProposalForTeam = useCallback(async (teamIndex) => {
+    if (!roomId) return;
+    setGeneratingIndex(teamIndex);
+    try {
+      await computingService.generateProposalsForRoom(roomId, teamIndex);
+      await loadTeams();
+    } catch (err) {
+      toast.error(err.message);
+      console.error(`Error generating proposals for team ${teamIndex}:`, err);
+    } finally {
+      setGeneratingIndex(null);
+    }
+  }, [roomId, loadTeams]);
+
   return {
     roomId,
     navigate,
     teamsWithProposals,
     isLoading,
-    comparing,                
-    handleCompareFundedProjects, 
+    comparing,
+    generatingIndex,
+    handleCompareFundedProjects,
+    handleGenerateProposalForTeam,
   };
 };
 

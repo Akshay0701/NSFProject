@@ -1,10 +1,10 @@
 const BASE_URL = '/api/nsf/room';
 
-const generateProposalsForRoom = async (roomID) => {
+const generateProposalsForRoom = async (roomID, teamIndex) => {
   const response = await fetch(`${BASE_URL}/generate-proposals`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ RoomID: roomID }),
+    body: JSON.stringify({ RoomID: roomID, team_index: teamIndex }),
   });
 
   if (!response.ok) {
