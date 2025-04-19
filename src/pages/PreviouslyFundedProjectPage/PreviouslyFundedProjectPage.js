@@ -1,9 +1,17 @@
 import React, { useRef } from 'react';
 import PageHeader from '../../components/PageHeader'; 
 import './PreviouslyFundedProjectPage.css';
-import TrashIcon from '../../assets/icons/TrashIcon';
-import EditIcon from '../../assets/icons/EditIcon';
 import usePreviouslyFundedProjects from '../../hooks/usePreviouslyFundedProjects';
+
+import { 
+  FiSave as SaveIcon,
+  FiX as CancelIcon,
+  FiPlus as PlusIcon,
+  FiUpload as UploadIcon,
+  FiEdit2 as EditIcon,
+  FiTrash2 as TrashIcon,
+  FiFileText as PageIcon
+} from 'react-icons/fi';
 
 const PreviouslyFundedProjectPage = () => {
   const {
@@ -26,7 +34,6 @@ const PreviouslyFundedProjectPage = () => {
   const fileInputRef = useRef(null);
 
   const handleAddCsvClick = () => {
-    // Clear previous errors when trying to upload again
     setError(null);
     fileInputRef.current?.click();
   };
@@ -37,139 +44,173 @@ const PreviouslyFundedProjectPage = () => {
         title="Previously Funded Projects"
         subtitle="Manage project abstracts loaded from CSV or added manually."
         actions={
-          <>
-            {/* Hidden file input */}
+          <div className="header-actions">
             <input
-                type="file"
-                accept=".csv, .xlsx, .xls"
-                onChange={handleFileChange}
-                ref={fileInputRef}
-                style={{ display: 'none' }}
-                disabled={isLoading}
-                />
-
-            {/* Button to trigger file input */}
+              type="file"
+              accept=".csv, .xlsx, .xls"
+              onChange={handleFileChange}
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+              disabled={isLoading}
+            />
             <button
               className="primary-button"
               onClick={handleAddCsvClick}
               disabled={isLoading}
             >
-              {isLoading ? 'Processing...' : '+ Add via CSV'}
+              <UploadIcon />
+              {isLoading ? 'Processing...' : 'Upload CSV'}
             </button>
-          </>
+            <button
+              className="secondary-button"
+              onClick={addProject}
+              disabled={isLoading}
+            >
+              <PlusIcon />
+              Add Project
+            </button>
+          </div>
         }
       />
 
-       {error && (
-        <div className="error-message-bar">
-          <p>Error: {error}</p>
+      {error && (
+        <div className="alert alert-error">
+          <p>{error}</p>
           <button onClick={() => setError(null)}>&times;</button>
         </div>
       )}
 
-      <div className="content-container-funded">
+      <div className="content-container">
         {projects.length > 0 ? (
-          <>
-            <div className="table-container">
+          <div className="card">
+            <div className="table-responsive">
               <table className="projects-table">
                 <thead>
                   <tr>
-                    <th className="col-number">No.</th>
+                    <th className="col-number">#</th>
                     <th className="col-abstract">Abstract</th>
                     <th className="col-actions">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {projects.map((project, index) => (
-                    <tr key={project.id}>
+                    <tr key={project.id} className={editingProjectId === project.id ? 'editing' : ''}>
                       <td className="col-number">{index + 1}</td>
-                      <td className="col-abstract abstract-cell">
+                      <td className="col-abstract">
                         {editingProjectId === project.id ? (
                           <textarea
-                            className="edit-textarea"
+                            className="form-textarea"
                             value={editedAbstract}
                             onChange={handleEditInputChange}
-                            rows={5} // Adjust as needed
+                            rows={5}
+                            autoFocus
                           />
                         ) : (
-                          <p>{project.abstract || <i>No abstract provided</i>}</p>
+                          <div className="abstract-content">
+                            {project.abstract || <span className="text-muted">No abstract provided</span>}
+                          </div>
                         )}
                       </td>
-                      <td className="col-actions action-cell">
-                        {editingProjectId === project.id ? (
-                          <>
-                            <button onClick={saveEdit} className="action-button save-button" title="Save Changes">
-                              ✓
-                            </button>
-                            <button onClick={cancelEditing} className="action-button cancel-button" title="Cancel Edit">
-                              ✕
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <button onClick={() => startEditing(project)} className="action-button edit-button" title="Edit Abstract">
-                              <EditIcon />
-                            </button>
-                            <button onClick={() => deleteProject(project.id)} className="action-button delete-button" title="Delete Project">
-                              <TrashIcon />
-                            </button>
-                          </>
-                        )}
+                      <td className="col-actions">
+                        <div className="action-buttons">
+                          {editingProjectId === project.id ? (
+                            <>
+                              <button 
+                                onClick={saveEdit} 
+                                className="btn-action btn-save"
+                                title="Save Changes"
+                              >
+                                <SaveIcon />
+                              </button>
+                              <button 
+                                onClick={cancelEditing} 
+                                className="btn-action btn-cancel"
+                                title="Cancel"
+                              >
+                                <CancelIcon />
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button 
+                                onClick={() => startEditing(project)} 
+                                className="btn-action btn-edit"
+                                title="Edit"
+                              >
+                                <EditIcon />
+                              </button>
+                              <button 
+                                onClick={() => deleteProject(project.id)} 
+                                className="btn-action btn-delete"
+                                title="Delete"
+                              >
+                                <TrashIcon />
+                              </button>
+                            </>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-            {/* Add Project button appears after the table if there are items */}
-            <div className="add-project-row-button-container">
-                 <button
-                    className="secondary-button add-project-button"
-                    onClick={addProject}
-                    disabled={isLoading}
-                  >
-                    + Add New Project Row
-                  </button>
+
+            <div className="card-footer">
+              <button
+                className="primary-button"
+                onClick={saveAllProjects}
+                disabled={isLoading || editingProjectId !== null}
+              >
+                {isLoading ? (
+                  <>
+                    Saving...
+                  </>
+                ) : (
+                  'Save All Projects'
+                )}
+              </button>
+              {editingProjectId !== null && (
+                <p className="save-notice">
+                  Finish editing current project to save all changes
+                </p>
+              )}
             </div>
-          </>
+          </div>
         ) : (
-          <div className="empty-state-funded">
+          <div className="empty-state">
             {isLoading ? (
-                <>
-                    <div className="loading-spinner"></div>
-                    <p>Processing file...</p>
-                </>
+              <div className="loading-state">
+                <div className="spinner"></div>
+                <p>Processing your file...</p>
+              </div>
             ) : (
-                <>
-                    <div className="empty-icon">📄</div>
-                    <h3>No Projects Added Yet</h3>
-                    <p>Upload a CSV file or add projects manually to get started.</p>
-                    <button
-                        className="primary-button"
-                        onClick={addProject} // Add first empty project
-                        disabled={isLoading}
-                        style={{marginTop: '1rem'}}
-                    >
-                        + Add First Project
-                    </button>
-                </>
+              <>
+                <div className="empty-icon">
+                  <PageIcon />
+                </div>
+                <h3>No Projects Added Yet</h3>
+                <p>Upload a CSV file or add projects manually to get started</p>
+                <div className="empty-actions">
+                  <button
+                    className="btn btn-primary"
+                    onClick={handleAddCsvClick}
+                  >
+                    <UploadIcon />
+                    Upload CSV
+                  </button>
+                  <button
+                    className="btn btn-secondary"
+                    onClick={addProject}
+                  >
+                    <PlusIcon />
+                    Add Project
+                  </button>
+                </div>
+              </>
             )}
           </div>
         )}
-
-        {/* Save All Button */}
-        {projects.length > 0 && (
-            <div className="save-all-container">
-                <button
-                    className="generate-button save-projects-button" // Reusing generate-button style
-                    onClick={saveAllProjects}
-                    disabled={isLoading || editingProjectId !== null} // Disable if loading or editing
-                >
-                    {isLoading ? 'Saving...' : 'Save All Projects'}
-                </button>
-                {editingProjectId !== null && <span className='save-disabled-reason'>(Finish editing to save)</span>}
-            </div>
-         )}
       </div>
     </div>
   );

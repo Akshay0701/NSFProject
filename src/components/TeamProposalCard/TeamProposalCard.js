@@ -5,10 +5,18 @@ import MemberIcon from '../../assets/icons/MemberIcon';
 import PageIcon from '../../assets/icons/PageIcon';
 
 const getColorFromScore = (score) => {
-  const red = Math.min(255, Math.floor(score * 255));
-  const green = Math.min(255, Math.floor((1 - score) * 255));
-  return `rgb(${red}, ${green}, 80)`;
+  const clamped = Math.max(0, Math.min(1, score));
+
+  const start = [224, 231, 255];
+  const end = [79, 70, 229];
+
+  const r = Math.round(start[0] + (end[0] - start[0]) * clamped);
+  const g = Math.round(start[1] + (end[1] - start[1]) * clamped);
+  const b = Math.round(start[2] + (end[2] - start[2]) * clamped);
+
+  return `rgb(${r}, ${g}, ${b})`;
 };
+
 
 const TeamProposalCard = ({ team, onGenerateProposals, generatingIndex }) => {
   const [showAllProposals, setShowAllProposals] = useState(false);
@@ -100,12 +108,12 @@ const TeamProposalCard = ({ team, onGenerateProposals, generatingIndex }) => {
                   return (
                     <div key={idx} className="proposal-team-project-item">
                       <div className="proposal-team-project-header">
-                        <h4>Proposal #{idx + 1}</h4>
+                        <h4>Proposal {idx + 1}</h4>
                         {percentage !== null && (
                           <div
                             className="similarity-circle"
                             title={`Similarity with funded project: ${percentage}%`}
-                            style={{ backgroundColor: color }}
+                            style={{ backgroundColor: "#6365f1db" }}
                           >
                             <span className="circle-text">{percentage}%</span>
                           </div>

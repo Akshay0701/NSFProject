@@ -48,17 +48,28 @@ const NSFSolicitationUploadCard = () => {
 
       <div className="card-body">
         <div className="nsf-solicitation-content">
-          <div className="upload-box" onClick={triggerFileUpload}>
-            <div className="upload-plus">+</div>
-            <input
-              type="file"
-              accept="application/pdf"
-              ref={fileInputRef}
-              style={{ display: 'none' }}
-              onChange={handleFileChange}
-            />
-            <p className="upload-label">{isUploadingPDF ? 'Uploading...' : 'Upload PDF'}</p>
+        <div className="upload-box" onClick={triggerFileUpload}>
+          <div className="upload-content">
+            {isUploadingPDF ? (
+              <>
+                <div className="upload-spinner"></div>
+                <p className="upload-label">Uploading...</p>
+              </>
+            ) : (
+              <>
+                <div className="upload-plus">+</div>
+                <p className="upload-label">Upload PDF</p>
+              </>
+            )}
           </div>
+          <input
+            type="file"
+            accept="application/pdf"
+            ref={fileInputRef}
+            style={{ display: 'none' }}
+            onChange={handleFileChange}
+          />
+        </div>
 
           <div className="keyword-tags-scrollable">
             {isEditing ? (
