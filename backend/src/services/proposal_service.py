@@ -69,15 +69,28 @@ class NSFProjectChain:
 
         # Create a prompt template to request 5 NSF project abstract recommendations.
         prompt_template = """
-        ### TEAM MEMBER PROFILE AND RESEARCH INTERESTS:
+        You are a research assistant with expertise in generating technical research proposals.
+
+        ### TEAM PROFILE
+        The team has the following members and expertise:
         {team_info}
-        
-        ### INSTRUCTION:
-        Generate 5 detailed project abstract recommendations for an research project proposal based on the team's profiles and research interests.
-        Each project abstract should be at least 3 sentences long, outlining the project scope, objectives, and potential impact.
-        
-        Return the output in valid JSON format with a single key "project_proposals" mapping to a list of 5 abstract strings.
-        Only return valid JSON without extra text.
+
+        ### TASK
+        Generate 5 unique and technically detailed research project abstracts suitable for NSF-style proposals. 
+        Each abstract should:
+        - Be 5-6 sentences long.
+        - Clearly define the **research problem**, **technical approach**, **objectives**, and **potential scientific or societal impact**.
+        - Use professional and academic language.
+
+        ### FORMAT
+        Respond strictly in **valid JSON format**, without markdown or extra commentary. Follow this schema:
+        {{
+        "project_proposals": [
+            "Abstract 1",
+            "Abstract 2",
+            "Abstract 3"
+        ]
+        }}
         """
 
         prompt = PromptTemplate.from_template(prompt_template)
@@ -123,43 +136,6 @@ class NSFProjectChain:
 
         return teams
     
-    def generate_proposals_for_room(self, data):
-        room_id = data.get("RoomID")
-        if not room_id:
-            return error_response("Room ID is required", 400)
-
-        try:
-            # Step 1: Fetch room data
-            response = get_room_by_id(room_id)
-            room_item = response.get("Item")
-
-            if not room_item:
-                return error_response("Room not found", 404)
-
-            teams = room_item.get("teams", [])
-            if not teams:
-                return error_response("No teams available to generate proposals", 400)
-
-            # Step 2: Generate proposals using NSFProjectChain
-            updated_teams = self.generate_proposals(teams)
-
-            # Step 3: Update teams in the database
-            update_room_item(
-                room_id=room_id,
-                update_expression="SET teams = :teams",
-                expression_attr_values={":teams": updated_teams}
-            )
-
-            return success_response({
-                "message": "Proposals generated successfully",
-                "teams": updated_teams
-            }, 200)
-
-        except ClientError as e:
-            return error_response(str(e), 500)
-        except Exception as e:
-            return error_response(str(e), 500)
-        
     def generate_proposal_for_single_team(self, data):
         room_id = data.get("RoomID")
         team_index = data.get("team_index")  # expecting int like 0, 1, 2...
@@ -203,3 +179,41 @@ class NSFProjectChain:
             import traceback
             print(traceback.format_exc())
             return error_response(f"Internal server error: {str(e)}", 500)
+
+    
+    def generate_proposals_for_room(self, data):
+        room_id = data.get("RoomID")
+        if not room_id:
+            return error_response("Room ID is required", 400)
+
+        try:
+            # Step 1: Fetch room data
+            response = get_room_by_id(room_id)
+            room_item = response.get("Item")
+
+            if not room_item:
+                return error_response("Room not found", 404)
+
+            teams = room_item.get("teams", [])
+            if not teams:
+                return error_response("No teams available to generate proposals", 400)
+
+            # Step 2: Generate proposals using NSFProjectChain
+            updated_teams = self.generate_proposals(teams)
+
+            # Step 3: Update teams in the database
+            update_room_item(
+                room_id=room_id,
+                update_expression="SET teams = :teams",
+                expression_attr_values={":teams": updated_teams}
+            )
+
+            return success_response({
+                "message": "Proposals generated successfully",
+                "teams": updated_teams
+            }, 200)
+
+        except ClientError as e:
+            return error_response(str(e), 500)
+        except Exception as e:
+            return error_response(str(e), 500)

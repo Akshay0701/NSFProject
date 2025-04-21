@@ -50,30 +50,52 @@ class TeamService:
 
     @staticmethod
     def form_teams(profiles: dict, max_team_size: int = 4) -> list[list]:
-        logger.info("Forming teams based on research interests")
+        logger.info("Forming diverse & balanced teams from clustered research interests")
+
         profile_names, research_texts = TeamService.preprocess_research_interests(profiles)
         vectors = TeamService.vectorize_texts(research_texts)
 
         n_samples = len(profile_names)
-        if n_samples == 0:
+        if n_samples < 2:
             return []
-        elif n_samples == 1:
-            return [[profile_names[0]]]
 
-        num_teams = TeamService.determine_optimal_clusters(vectors, max_team_size)
-        kmeans = KMeans(n_clusters=num_teams, random_state=42, n_init=10)
+        # Step 1: Cluster similar profiles
+        num_clusters = TeamService.determine_optimal_clusters(vectors, max_team_size)
+        kmeans = KMeans(n_clusters=num_clusters, random_state=42, n_init=10)
         labels = kmeans.fit_predict(vectors)
 
-        clusters = {i: [] for i in range(num_teams)}
-        for i, profile in enumerate(profile_names):
-            clusters[labels[i]].append(profile)
+        # Step 2: Group profiles by cluster
+        clusters = {i: [] for i in range(num_clusters)}
+        for i, name in enumerate(profile_names):
+            clusters[labels[i]].append(name)
 
+        # Step 3: Distribute cluster members across teams (round-robin to maximize diversity)
+        flat_members = []
+        for cluster_id in sorted(clusters, key=lambda c: len(clusters[c]), reverse=True):
+            flat_members.extend(clusters[cluster_id])
+
+        teams = [[] for _ in range((n_samples + max_team_size - 1) // max_team_size)]
+
+        for idx, member in enumerate(flat_members):
+            team_idx = idx % len(teams)
+            teams[team_idx].append(member)
+
+        # Step 4: Fix solo member edge case
         final_teams = []
-        for members in clusters.values():
-            for i in range(0, len(members), max_team_size):
-                final_teams.append(members[i:i + max_team_size])
+        leftover = []
+        for team in teams:
+            if len(team) == 1:
+                leftover.extend(team)
+            else:
+                final_teams.append(team)
 
-        logger.debug(f"Formed teams: {final_teams}")
+        if leftover:
+            if final_teams:
+                final_teams[-1].extend(leftover)
+            else:
+                final_teams.append(leftover)
+
+        logger.debug(f"Formed balanced diverse teams: {final_teams}")
         return final_teams
 
     @staticmethod
