@@ -1,5 +1,47 @@
 ![](images/background.png)
 
+# NSF Team Collaboration Platform
+
+An AI-powered collaboration platform that assists research teams in generating impactful NSF project proposals. Built using **LLM (LLaMA 3.3)**, **React**, **Flask**, and **NLP techniques**, this system intelligently analyzes researcher profiles and suggests tailored, fundable research ideas.
+
+---
+
+##  Features
+
+-  **Researcher Expertise Extraction**
+  - Extracts domain-specific skills and topics from researcher bios using Natural Language Processing.
+  - Uses TF-IDF and embedding-based techniques for accurate topic modeling.
+
+-  **AI-Powered Proposal Generator**
+  - Leverages **LLaMA 3.3** to generate high-quality, domain-aligned project proposals.
+  - Customized to align with **NSF funding priorities**.
+
+-  **Smart Researcher-Team Matching**
+  - Matches researchers to teams based on expertise similarity.
+  - Supports interdisciplinary collaboration by identifying complementary skills.
+
+-  **Modular Architecture**
+  - Built with **React** for frontend and **Flask (Python)** for backend.
+  - Easy to extend for additional funding agencies or proposal formats.
+
+---
+
+##  Tech Stack
+
+| Layer        | Technologies                          |
+|--------------|----------------------------------------|
+| Frontend     | React, HTML/CSS, JavaScript            |
+| Backend      | Flask, Python, RESTful APIs            |
+| AI/ML        | LLaMA 3.3, TF-IDF, Sentence Embeddings |
+| NLP Tools    | NLTK, spaCy, Scikit-learn              |
+| Deployment   | Docker, GitHub Actions (CI/CD)         |
+
+---
+
+
+
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
